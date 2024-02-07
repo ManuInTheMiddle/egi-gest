@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import Navbar from "@/components/ui/navbar";
+import Footer from "@/components/ui/footer";
+import Options from "@/components/ui/options";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -16,14 +18,13 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <header>
-        <nav>
-          <Navbar />
-        </nav>
-      </header>
-      <body className={inter.className}>{children}</body>
-      <footer></footer>
+    <html lang="en" className="no-scrollbar">
+      <section className={inter.className}>
+        <Navbar />
+        <Options />
+        {children}
+        <Footer />
+      </section>
     </html>
   );
 }
