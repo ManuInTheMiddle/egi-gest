@@ -28,8 +28,7 @@ import {
   FormLabel,
 } from "@/components/ui/form";
 import { Search } from "lucide-react";
-
-import { CircularProgress } from "@nextui-org/react";
+import ProgressBar from "react-customizable-progressbar";
 
 const formSchema = z.object({
   ordemFabrico: z.string(),
@@ -103,7 +102,7 @@ const page = () => {
             </Form>
           </div>
           <div className="flex flex-row ml-auto mr-0 gap-5 ">
-            <Card>
+            <Card className="border-2 border-lime-500 flex flex-col shadow-md">
               <CardHeader>
                 <CardDescription>Lista das Ordens de Fabrico</CardDescription>
               </CardHeader>
@@ -164,23 +163,30 @@ const page = () => {
               </CardContent>
             </Card>
             <div>
-              <Card className="flex flex-col mt-">
+              <Card className="border-2 border-lime-500 flex flex-col shadow-md">
                 <CardHeader>
                   <CardDescription>
                     Progresso das ordens de fabrico
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <CircularProgress
-                    label="speed"
-                    size="lg"
-                    value={85}
-                    formatOptions={{ style: "unit", unit: "kilometer" }}
-                    showValueLabel={true}
-                  />
+                  <ProgressBar
+                    progress={100}
+                    radius={100}
+                    strokeWidth={10}
+                    cut={120}
+                    rotate={150}
+                    trackStrokeWidth={0}
+                    strokeLinecap="square"
+                    strokeColor="#475569"
+                  >
+                    <div className="your-indicator">
+                      <div>100%</div>
+                    </div>
+                  </ProgressBar>
                 </CardContent>
               </Card>
-              <Card className="mt-5 py-5">
+              <Card className="mt-5 py-5 border-2 border-lime-500 flex flex-col shadow-md">
                 <CardContent>
                   <Table className="border ">
                     <TableCaption>Ordens a fabricar (SAP)</TableCaption>

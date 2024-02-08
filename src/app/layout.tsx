@@ -4,7 +4,7 @@ import "./globals.css";
 import Navbar from "@/components/ui/navbar";
 import Footer from "@/components/ui/footer";
 import Options from "@/components/ui/options";
-import { Providers } from "./providers";
+
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -21,12 +21,10 @@ export default function RootLayout({
   return (
     <html lang="en" className="no-scrollbar">
       <section className={inter.className}>
-        <Providers>
-          <Navbar />
-          <Options />
-          {children}
-          <Footer />
-        </Providers>
+        <Navbar />
+        <Options />
+        {children}
+        <Footer />
       </section>
     </html>
   );
