@@ -28,7 +28,7 @@ import {
   FormLabel,
 } from "@/components/ui/form";
 import { Search } from "lucide-react";
-import ProgressBar from "react-customizable-progressbar";
+import ProgressoFabrico from "./progressoFabrico";
 
 const formSchema = z.object({
   ordemFabrico: z.string(),
@@ -170,20 +170,17 @@ const page = () => {
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <ProgressBar
-                    progress={100}
-                    radius={100}
-                    strokeWidth={10}
-                    cut={120}
-                    rotate={150}
-                    trackStrokeWidth={0}
-                    strokeLinecap="square"
-                    strokeColor="#475569"
-                  >
-                    <div className="your-indicator">
-                      <div>100%</div>
+                  <ProgressoFabrico Ipercentage={100} />
+                  <div className="-mt-3">
+                    <div className="flex flex-row">
+                      <p className="font-medium">Ordens Agendadas:</p>&nbsp;
+                      {0} ordens
                     </div>
-                  </ProgressBar>
+                    <div className="flex flex-row">
+                      <p className="font-medium">Ordens Concluidas:</p>&nbsp;
+                      {0} ordens
+                    </div>
+                  </div>
                 </CardContent>
               </Card>
               <Card className="mt-5 py-5 border-2 border-lime-500 flex flex-col shadow-md">

@@ -10,7 +10,7 @@ export default function Options() {
   return (
     <div className="grid grid-flow-col auto-cols-max mt-10 justify-evenly gap-x-4">
       <a href="/">
-        <Card className="flex flex-col w-[190px] items-center justify-center pt-5 shadow-2xl hover:bg-lime-500 duration-275 ease-in hover:translate-y-1 hover:translate-x-1">
+        <Card className="flex flex-col w-[190px] border-lime-500 items-center justify-center pt-5 drop-shadow-2xl hover:bg-gradient-to-br from-white to-lime-500 to-80% duration-275 ease-in  hover:translate-y-1 hover:translate-x-1 hover:border-0">
           <CardContent>
             <LayoutDashboard />
           </CardContent>
@@ -20,7 +20,7 @@ export default function Options() {
         </Card>
       </a>
       <a href="ordemFabrico">
-        <Card className="flex flex-col items-center w-[190px]  justify-center pt-5 shadow-2xl hover:bg-lime-500 duration-275 ease-in hover:translate-y-1 hover:translate-x-1">
+        <Card className="flex flex-col w-[190px] border-lime-500 items-center justify-center pt-5 drop-shadow-2xl hover:bg-gradient-to-br from-white to-lime-500 to-80% duration-275 ease-in hover:translate-y-1 hover:translate-x-1 hover:border-0">
           <CardContent>
             <ClipboardList />
           </CardContent>
@@ -30,7 +30,7 @@ export default function Options() {
         </Card>
       </a>
       <a href="producao">
-        <Card className="flex flex-col items-center w-[190px]  justify-center pt-5 shadow-2xl hover:bg-lime-500 duration-275 ease-in hover:translate-y-1 hover:translate-x-1">
+        <Card className="flex flex-col w-[190px] border-lime-500 items-center justify-center pt-5 drop-shadow-2xl hover:bg-gradient-to-br from-white to-lime-500 to-80% duration-275 ease-in hover:translate-y-1 hover:translate-x-1 hover:border-0">
           <CardContent>
             <Factory />
           </CardContent>
@@ -40,7 +40,7 @@ export default function Options() {
         </Card>
       </a>
       <a href="maisPrafrente">
-        <Card className="flex flex-col items-center w-[190px] justify-center pt-5 shadow-2xl hover:bg-lime-500 duration-275 ease-in hover:translate-y-1 hover:translate-x-1">
+        <Card className="flex flex-col w-[190px] border-lime-500 items-center justify-center pt-5 drop-shadow-2xl hover:bg-gradient-to-br from-white to-lime-500 to-80% duration-275 ease-in hover:translate-y-1 hover:translate-x-1 hover:border-0">
           <CardContent>
             <Warehouse />
           </CardContent>
