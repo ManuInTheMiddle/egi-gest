@@ -1,4 +1,5 @@
 "use client";
+import React from "react";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -26,9 +27,9 @@ import {
   FormControl,
   FormLabel,
 } from "@/components/ui/form";
-
 import { Search } from "lucide-react";
-import { ProgressCircle } from "@tremor/react";
+
+import { CircularProgress } from "@nextui-org/react";
 
 const formSchema = z.object({
   ordemFabrico: z.string(),
@@ -163,14 +164,20 @@ const page = () => {
               </CardContent>
             </Card>
             <div>
-              <Card>
+              <Card className="flex flex-col mt-">
                 <CardHeader>
                   <CardDescription>
                     Progresso das ordens de fabrico
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <ProgressCircle value={80} />
+                  <CircularProgress
+                    label="speed"
+                    size="lg"
+                    value={85}
+                    formatOptions={{ style: "unit", unit: "kilometer" }}
+                    showValueLabel={true}
+                  />
                 </CardContent>
               </Card>
               <Card className="mt-5 py-5">
