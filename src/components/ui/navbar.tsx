@@ -1,11 +1,15 @@
+"use client";
 import { Settings } from "lucide-react";
+import { User } from "lucide-react";
+import Link from "next/link";
+import { signOut } from "next-auth/react";
 
 const Navbar = () => {
   return (
     <div>
       <nav className="bg-slate-600">
         <div className="max-w-screen-xl flex flex-wrap items-center justify-between mx-auto p-4">
-          <a
+          <Link
             href="https://jpm.pt/pt/inicio/"
             className="flex items-center space-x-3 rtl:space-x-reverse"
           >
@@ -14,13 +18,16 @@ const Navbar = () => {
               className="h-8"
               alt="JPM Logo"
             />
-          </a>
-          <a href="/" className="text-white">
+          </Link>
+          <Link href="/" className="text-white">
             HOME
-          </a>
-          <a href="opcoes">
+          </Link>
+          <Link href="">
+            <User color="white" />
+          </Link>
+          <Link href="opcoes">
             <Settings color="white" />
-          </a>
+          </Link>
         </div>
       </nav>
       <div className="bg-lime-500 h-1" />
