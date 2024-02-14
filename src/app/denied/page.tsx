@@ -1,7 +1,7 @@
 const page = () => {
   return (
     <div className="flex flex-col justify-center items-center mt-10">
-      NAO TEM PERMISSOES PARA ACEDER
+      O utilizador desta sessão não tem premissões para aceder a esta secçao
     </div>
   );
 };
