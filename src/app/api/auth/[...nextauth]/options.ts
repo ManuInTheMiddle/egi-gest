@@ -50,11 +50,56 @@ export const options: NextAuthOptions = {
           password: "JPM_4528",
         };
 
+        const dashboard = {
+          id: "15123",
+          role: "dashboard",
+          username: "Dashboard",
+          email: "dashboard@jpm.pt",
+          password: "Dashboard_4528",
+        };
+
+        const ordensFabrico = {
+          id: "103979",
+          role: "ordensfabrico",
+          username: "OrdensFabrico",
+          email: "ordensfabrico@jpm.pt",
+          password: "OrdensFabrico_4528",
+        };
+
+        const producao = {
+          id: "15325",
+          role: "producao",
+          username: "Producao",
+          email: "Producao@jpm.pt",
+          password: "Producao_4528",
+        };
+
+        if (
+          credentials?.username === dashboard.username &&
+          credentials?.password === dashboard.password
+        ) {
+          return dashboard;
+        }
+
         if (
           credentials?.username === userUser.username &&
           credentials?.password === userUser.password
         ) {
           return userUser;
+        }
+
+        if (
+          credentials?.username === ordensFabrico.username &&
+          credentials?.password === ordensFabrico.password
+        ) {
+          return ordensFabrico;
+        }
+
+        if (
+          credentials?.username === producao.username &&
+          credentials?.password === producao.password
+        ) {
+          return producao;
         }
 
         if (
@@ -65,6 +110,8 @@ export const options: NextAuthOptions = {
         } else {
           return null;
         }
+
+
       },
     }),
   ],
