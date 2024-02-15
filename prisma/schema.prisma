@@ -1,11 +1,302 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
-  provider = "postgresql"
+  provider = "sqlserver"
   url      = env("DATABASE_URL")
+}
+
+model equip_element {
+  id           Int      @id(map: "PK_equip_element") @default(autoincrement())
+  creationDate DateTime @default(now(), map: "DF_equip_element_DATA") @db.DateTime
+  equipment    String   @db.VarChar(32)
+  ee_type      String   @db.VarChar(32)
+  ee_class     String?  @db.VarChar(32)
+  description  String?  @db.VarChar(255)
+}
+
+model equip_interface {
+  id              Int      @id(map: "PK_equip_interface") @default(autoincrement())
+  creationDate    DateTime @default(now(), map: "DF_equip_interface_DATA") @db.DateTime
+  equipment       String   @db.VarChar(32)
+  equipment_phase String   @db.VarChar(64)
+  description     String?  @db.VarChar(255)
+}
+
+model equip_interface_parameter {
+  id              Int      @id(map: "PK_equip_interface_parameter") @default(autoincrement())
+  creationDate    DateTime @default(now(), map: "DF_equip_interface_parameter_DATA") @db.DateTime
+  equipment       String   @db.VarChar(32)
+  equipment_phase String   @db.VarChar(64)
+  parameter       String   @db.VarChar(32)
+  param_type      String   @db.VarChar(32)
+  engr_units      String?  @db.VarChar(32)
+  description     String?  @db.VarChar(255)
+}
+
+model equip_link {
+  id           Int      @id(map: "PK_equip_link") @default(autoincrement())
+  creationDate DateTime @default(now(), map: "DF_equip_link_DATA") @db.DateTime
+  equipment    String   @db.VarChar(32)
+  to_equipment String   @db.VarChar(32)
+  description  String?  @db.VarChar(255)
+}
+
+model equip_phases {
+  id           Int      @id(map: "PK_equip_phases") @default(autoincrement())
+  creationDate DateTime @default(now(), map: "DF_equip_phases_DATA") @db.DateTime
+  phase        String   @db.VarChar(64)
+  description  String?  @db.VarChar(255)
+}
+
+model equip_phases_parameter {
+  id           Int      @id(map: "PK_equip_phases_parameter") @default(autoincrement())
+  creationDate DateTime @default(now(), map: "DF_equip_phases_parameter_DATA") @db.DateTime
+  phase        String   @db.VarChar(64)
+  parameter    String   @db.VarChar(32)
+  param_type   String   @db.VarChar(32)
+  engr_units   String?  @db.VarChar(32)
+  description  String?  @db.VarChar(255)
+}
+
+model equip_property {
+  id             Int      @id(map: "PK_equip_property") @default(autoincrement())
+  creationDate   DateTime @default(now(), map: "DF_equip_property_DATA") @db.DateTime
+  equipment      String   @db.VarChar(32)
+  property       String   @db.VarChar(255)
+  property_value String?  @db.VarChar(32)
+  engr_units     String?  @db.VarChar(32)
+  description    String?  @db.VarChar(255)
+}
+
+model m_recipe_approvals {
+  id               Int      @id(map: "PK_m_recipe_approvals") @default(autoincrement())
+  creationDate     DateTime @default(now(), map: "DF_m_recipe_approvals_DATA") @db.DateTime
+  type             String   @db.VarChar(128)
+  author           String   @db.VarChar(128)
+  level            String?  @db.VarChar(255)
+  m_recipe         String   @db.VarChar(128)
+  m_recipe_version String   @db.VarChar(16)
+  description      String?  @db.VarChar(255)
+}
+
+model m_recipe_control {
+  id           Int      @id(map: "PK_m_recipe_control") @default(autoincrement())
+  creationDate DateTime @default(now(), map: "DF_m_recipe_control_DATA") @db.DateTime
+  id_recipe    Int
+  step         Int
+  id_phase     Int
+  par_1        Int?
+  par_2        Float?
+  par_3        Int?
+  par_4        Int?
+}
+
+model m_recipe_element {
+  id              Int      @id(map: "PK_m_recipe_element") @default(autoincrement())
+  creationDate    DateTime @default(now(), map: "DF_m_recipe_element_DATA") @db.DateTime
+  re              String   @db.VarChar(128)
+  re_version      String   @db.VarChar(16)
+  author          String?  @db.VarChar(32)
+  product         String?  @db.VarChar(32)
+  description     String?  @db.VarChar(255)
+  status          String?  @db.VarChar(128)
+  re_type         String?  @db.VarChar(32)
+  derived_re      String?  @db.VarChar(128)
+  derived_version String?  @db.VarChar(16)
+  default_batch   Int?
+  engr_units      String?  @db.VarChar(32)
+  steps_count     Int?
+}
+
+model m_recipe_element_equip {
+  id           Int      @id(map: "PK_m_recipe_element_equip") @default(autoincrement())
+  creationDate DateTime @default(now(), map: "DF_m_recipe_element_equip_DATA") @db.DateTime
+  re           String   @db.VarChar(128)
+  re_version   String   @db.VarChar(16)
+  equipment    String   @db.VarChar(32)
+}
+
+model m_recipe_element_parameter {
+  id              Int      @id(map: "PK_m_recipe_element_parameter") @default(autoincrement())
+  creationDate    DateTime @default(now(), map: "DF_m_recipe_element_parameter_DATA") @db.DateTime
+  re              String   @db.VarChar(128)
+  re_version      String   @db.VarChar(16)
+  parameter       String   @db.VarChar(32)
+  parameter_value String?  @db.VarChar(128)
+  engr_units      String?  @db.VarChar(32)
+  param_type      String   @db.VarChar(32)
+}
+
+model m_recipe_link {
+  id               Int      @id(map: "PK_m_recipe_link") @default(autoincrement())
+  creationDate     DateTime @default(now(), map: "DF_m_recipe_link_DATA") @db.DateTime
+  re               String   @db.VarChar(128)
+  re_version       String   @db.VarChar(16)
+  from_element     String   @db.VarChar(128)
+  to_element       String   @db.VarChar(128)
+  m_recipe         String   @db.VarChar(128)
+  m_recipe_version String   @db.VarChar(16)
+  parent_step      String   @db.VarChar(128)
+}
+
+model m_recipe_step {
+  id               Int      @id(map: "PK_m_recipe_step") @default(autoincrement())
+  creationDate     DateTime @default(now(), map: "DF_m_recipe_step_DATA") @db.DateTime
+  step             String   @db.VarChar(128)
+  re               String   @db.VarChar(128)
+  re_version       String   @db.VarChar(16)
+  re_type          String   @db.VarChar(32)
+  m_recipe         String   @db.VarChar(128)
+  m_recipe_version String   @db.VarChar(16)
+  href             String?  @db.VarChar(255)
+  back_color       String?  @db.VarChar(128)
+  tree_priority    Int?
+  parent_id        Int?
+  phases_order     Int?
+  parent_step      String   @db.VarChar(128)
+}
+
+model m_recipe_step_parameter {
+  id               Int      @id(map: "PK_m_recipe_step_parameter") @default(autoincrement())
+  creationDate     DateTime @default(now(), map: "DF_m_recipe_step_parameter_DATA") @db.DateTime
+  step             String   @db.VarChar(128)
+  re               String   @db.VarChar(128)
+  re_version       String   @db.VarChar(16)
+  parameter        String   @db.VarChar(32)
+  parameter_value  String?  @db.VarChar(128)
+  engr_units       String?  @db.VarChar(32)
+  param_type       String   @db.VarChar(32)
+  m_recipe         String   @db.VarChar(128)
+  m_recipe_version String   @db.VarChar(16)
+  parent_step      String   @db.VarChar(128)
+}
+
+model materials {
+  id           Int      @id(map: "PK_materials") @default(autoincrement())
+  creationDate DateTime @default(now(), map: "DF_materials_DATA") @db.DateTime
+  material     String   @db.VarChar(64)
+  type         String   @db.VarChar(32)
+  description  String?  @db.VarChar(255)
+}
+
+model materials_charac {
+  id             Int      @id(map: "PK_materials_charac") @default(autoincrement())
+  creationDate   DateTime @default(now(), map: "DF_materials_charac_DATA") @db.DateTime
+  material       String   @db.VarChar(64)
+  characteristic String   @db.VarChar(64)
+  default_value  String?  @db.VarChar(32)
+  engr_units     String?  @db.VarChar(32)
+  description    String?  @db.VarChar(255)
+}
+
+model materials_loc {
+  id           Int      @id(map: "PK_materials_loc") @default(autoincrement())
+  creationDate DateTime @default(now(), map: "DF_materials_loc_DATA") @db.DateTime
+  location     String   @db.VarChar(32)
+  material     String   @db.VarChar(64)
+  description  String?  @db.VarChar(255)
+}
+
+/// The underlying table does not contain a valid unique identifier and can therefore currently not be handled by Prisma Client.
+model REATOR_Recipe_Dados {
+  DataHora             DateTime  @db.DateTime
+  ID_Recipe            Int
+  Name                 String    @db.VarChar(128)
+  Quantidade           Int
+  Reator               Int
+  TPA                  Int
+  NumofSteps           Int?
+  Lote_Recipe          String?   @db.VarChar(20)
+  Reator_Volume_Final  Float?
+  RecipeCanceled       Boolean?
+  RecipeFinished       Boolean?
+  Data_Start           DateTime? @db.DateTime
+  Data_End             DateTime? @db.DateTime
+  Store                Boolean?
+  Saved                Boolean?
+  Step                 Int?
+  Phase                String?   @db.VarChar(32)
+  Nome_MP              String?   @db.VarChar(128)
+  Lote_TMP             Int?
+  Volume_Teorico       Float?
+  Volume_Real          Float?
+  Volume_Reator_Step   Float?
+  Par_1                Int?
+  Par_2                Int?
+  Status_Recipe        Int?
+  DataHora_Inicio_Step DateTime? @db.DateTime
+  DataHora_Fim_Step    DateTime? @db.DateTime
+  Alarmes              String?   @db.Text
+
+  @@ignore
+}
+
+model sysdiagrams {
+  name         String @db.NVarChar(128)
+  principal_id Int
+  diagram_id   Int    @id(map: "PK__sysdiagr__C2B05B61BB25E080") @default(autoincrement())
+  version      Int?
+  definition   Bytes?
+
+  @@unique([principal_id, name], map: "UK_principal_name")
+}
+
+/// The underlying table does not contain a valid unique identifier and can therefore currently not be handled by Prisma Client.
+model TMP_Load_Dados {
+  DataHora              DateTime  @db.DateTime
+  ID_TMP                Int
+  ID_Destiny            Int
+  Lote                  Int
+  Data_Start            DateTime? @db.DateTime
+  Data_End              DateTime? @db.DateTime
+  Operation             String?   @db.Text
+  Tanque_Volume_Inicial Float?
+  Tanque_Volume_Final   Float?
+  Tanque_Volume_Teorico Float?
+  Tanque_Volume_Load    Float?
+  Store                 Boolean?
+  Saved                 Boolean?
+  Alarms                String?   @db.Text
+
+  @@ignore
+}
+
+model units_measure {
+  id            Int      @id(map: "PK_units_measure") @default(autoincrement())
+  creationDate  DateTime @default(now(), map: "DF_units_measure_DATA") @db.DateTime
+  engr_units    String   @db.VarChar(32)
+  recipe_header Boolean
+  description   String?  @db.VarChar(255)
+}
+
+model users {
+  id           Int      @id(map: "PK_users") @default(autoincrement())
+  creationDate DateTime @default(now(), map: "DF_users_DATA") @db.DateTime
+  username     String   @db.VarChar(128)
+  name         String   @db.VarChar(128)
+  password     String   @db.VarChar(255)
+  level        String   @db.VarChar(128)
+  status       Boolean
+}
+
+model users_error_logs {
+  id           Int      @id(map: "PK_users_error_logs") @default(autoincrement())
+  creationDate DateTime @default(now(), map: "DF_users_error_logs_DATA") @db.DateTime
+  username     String   @db.VarChar(128)
+  password     String   @db.VarChar(255)
+}
+
+model users_levels {
+  id           Int      @id(map: "PK_users_levels") @default(autoincrement())
+  creationDate DateTime @default(now(), map: "DF_users_levels_DATA") @db.DateTime
+  level        String   @unique(map: "UQ__users_le__C03A140A1791671F") @db.VarChar(128)
+  description  String?  @db.VarChar(128)
+}
+
+model users_logs {
+  id           Int      @id(map: "PK_users_logs") @default(autoincrement())
+  creationDate DateTime @default(now(), map: "DF_users_logs_DATA") @db.DateTime
+  username     String   @db.VarChar(128)
 }
