@@ -4,6 +4,7 @@ import {
   ClipboardList,
   Factory,
   Warehouse,
+  Boxes,
 } from "lucide-react";
 
 export default function Options() {
@@ -16,6 +17,16 @@ export default function Options() {
           </CardContent>
           <CardFooter>
             <p>DashBoard</p>
+          </CardFooter>
+        </Card>
+      </a>
+      <a href="/chegadaMateriaPrima">
+        <Card className="flex flex-col w-[190px] border-lime-500 items-center justify-center pt-5 drop-shadow-2xl hover:bg-gradient-to-br from-white to-lime-500 to-80% duration-275 ease-in  hover:translate-y-1 hover:translate-x-1 hover:border-0">
+          <CardContent>
+            <Boxes />
+          </CardContent>
+          <CardFooter>
+            <p>Matéria Prima</p>
           </CardFooter>
         </Card>
       </a>

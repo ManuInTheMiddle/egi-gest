@@ -50,12 +50,21 @@ export const options: NextAuthOptions = {
           password: "JPM_4528",
         };
 
+        
         const dashboard = {
           id: "15123",
           role: "dashboard",
           username: "Dashboard",
           email: "dashboard@jpm.pt",
           password: "Dashboard_4528",
+        };
+
+        const chegadaMP = {
+          id: "10312",
+          role: "chegadaMP",
+          username: "ChegadaMP",
+          email: "chegadaMP@jpm.pt",
+          password: "JPM_4528",
         };
 
         const ordensFabrico = {
@@ -79,6 +88,13 @@ export const options: NextAuthOptions = {
           credentials?.password === dashboard.password
         ) {
           return dashboard;
+        }
+
+        if (
+          credentials?.username === chegadaMP.username &&
+          credentials?.password === chegadaMP.password
+        ) {
+          return chegadaMP;
         }
 
         if (
