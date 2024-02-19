@@ -24,6 +24,13 @@ export default withAuth(
     }
 
     if (
+      request.nextUrl.pathname.startsWith("/chegadaMateriaPrima") &&
+      request.nextauth.token?.role !== "admin"
+    ) {
+      return NextResponse.rewrite(new URL("/denied", request.url));
+    }
+
+    if (
       request.nextUrl.pathname.startsWith("/ordemFabrico") &&
       request.nextauth.token?.role !== "admin" &&
       request.nextauth.token?.role !== "ordensfabrico"
@@ -54,5 +61,12 @@ export default withAuth(
 );
 
 export const config = {
-  matcher: ["/", "/dashboard", "/ordemFabrico", "/producao", "/opcoes"],
+  matcher: [
+    "/",
+    "/dashboard",
+    "/chegadaMateriaPrima",
+    "/ordemFabrico",
+    "/producao",
+    "/opcoes",
+  ],
 };
