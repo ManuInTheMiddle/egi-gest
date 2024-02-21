@@ -1,10 +1,6 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
-import "./globals.css";
-import Navbar from "@/components/ui/navbar";
-import Footer from "@/components/ui/footer";
-import Options from "@/components/ui/options";
-
+import "../globals.css";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -20,12 +16,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className="no-scrollbar">
-      <section className={inter.className}>
-        <Navbar />
-        <Options />
-        {children}
-        <Footer />
-      </section>
+      <section className={inter.className}>{children}</section>
     </html>
   );
 }
