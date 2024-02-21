@@ -34,6 +34,21 @@ export const options: NextAuthOptions = {
       },
       async authorize(credentials, req) {
         //this is where u retrieve the user credentials from DB
+        /*
+        if(!credentials?.username || !credentials?.password){
+          return null
+        }
+
+        try{
+          const user = login(credentials?.username, credentials?.password);
+          return user;
+        }catch(err){
+          console.error(err);
+          return null;
+        }
+        
+        */
+
         const userAdmin = {
           id: "4528",
           role: "admin",
