@@ -23,3 +23,5 @@ const SignInButton = () => {
     </div>
   );
 };
+
+export default SignInButton;
