@@ -2,6 +2,7 @@ import type { NextAuthOptions } from "next-auth";
 import GitHubProvider from "next-auth/providers/github";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { GithubProfile } from "next-auth/providers/github";
+import { login } from "@/lib/auth";
 
 export const options: NextAuthOptions = {
   providers: [
@@ -34,6 +35,21 @@ export const options: NextAuthOptions = {
       },
       async authorize(credentials, req) {
         //this is where u retrieve the user credentials from DB
+        /*
+        if(!credentials?.username || !credentials?.password){
+          return null
+        }
+
+        try{
+          const user = login(credentials?.username, credentials?.password);
+          return user;
+        }catch(err){
+          console.error(err);
+          return null;
+        }
+        
+        */
+
         const userAdmin = {
           id: "4528",
           role: "admin",

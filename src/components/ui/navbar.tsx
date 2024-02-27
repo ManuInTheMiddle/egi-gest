@@ -2,7 +2,7 @@
 import { Settings } from "lucide-react";
 import { User } from "lucide-react";
 import Link from "next/link";
-import { signOut } from "next-auth/react";
+import SignInB
 
 const Navbar = () => {
   return (
