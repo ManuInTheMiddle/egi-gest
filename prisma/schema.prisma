@@ -3,300 +3,175 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlserver"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
-model equip_element {
-  id           Int      @id(map: "PK_equip_element") @default(autoincrement())
-  creationDate DateTime @default(now(), map: "DF_equip_element_DATA") @db.DateTime
-  equipment    String   @db.VarChar(32)
-  ee_type      String   @db.VarChar(32)
-  ee_class     String?  @db.VarChar(32)
-  description  String?  @db.VarChar(255)
+model detalhes_entrada_materia_prima {
+  id_detalhe_materia_prima                                                                          Int                   @id(map: "detalhes_entrada_materia_prima_pk") @default(autoincrement())
+  entrada_materia_prima                                                                             Int
+  materia_prima                                                                                     Int
+  quantidade                                                                                        Int
+  data_devolucao_ibc                                                                                DateTime              @db.Date
+  data_validade_materia_prima                                                                       Int
+  entrada_materia_prima_detalhes_entrada_materia_prima_entrada_materia_primaToentrada_materia_prima entrada_materia_prima @relation("detalhes_entrada_materia_prima_entrada_materia_primaToentrada_materia_prima", fields: [entrada_materia_prima], references: [id_entrada_materia_prima], onDelete: NoAction, onUpdate: NoAction, map: "detalhes_entrada_mp_entrada_mp_id_entrada_mp_fk")
+  materias_primas                                                                                   materias_primas       @relation(fields: [materia_prima], references: [id_materia_prima], onDelete: NoAction, onUpdate: NoAction, map: "detalhes_entrada_mp_mp_id_mp_fk")
 }
 
-model equip_interface {
-  id              Int      @id(map: "PK_equip_interface") @default(autoincrement())
-  creationDate    DateTime @default(now(), map: "DF_equip_interface_DATA") @db.DateTime
-  equipment       String   @db.VarChar(32)
-  equipment_phase String   @db.VarChar(64)
-  description     String?  @db.VarChar(255)
+model detalhes_fornecedores {
+  fornecedor               Int
+  dias_devolucao_ibc       Int?
+  id_detalhes_fornecedores Int          @id(map: "detalhes_fornecedores_pk") @default(autoincrement())
+  fornecedores             fornecedores @relation(fields: [fornecedor], references: [id_fornecedor], onDelete: NoAction, onUpdate: NoAction, map: "detalhes_fornecedores_fornecedores_id_fornecedor_fk")
 }
 
-model equip_interface_parameter {
-  id              Int      @id(map: "PK_equip_interface_parameter") @default(autoincrement())
-  creationDate    DateTime @default(now(), map: "DF_equip_interface_parameter_DATA") @db.DateTime
-  equipment       String   @db.VarChar(32)
-  equipment_phase String   @db.VarChar(64)
-  parameter       String   @db.VarChar(32)
-  param_type      String   @db.VarChar(32)
-  engr_units      String?  @db.VarChar(32)
-  description     String?  @db.VarChar(255)
+model detalhes_materia_prima {
+  id_detalhe_materia_prima    Int             @id(map: "detalhes_materia_prima_pk") @default(autoincrement())
+  data_validade_materia_prima DateTime?       @db.Date
+  materia_prima               Int
+  fornecedor                  Int?
+  fornecedores                fornecedores?   @relation(fields: [fornecedor], references: [id_fornecedor], onDelete: NoAction, onUpdate: NoAction, map: "detalhes_materia_prima_fornecedores_id_fornecedor_fk")
+  materias_primas             materias_primas @relation(fields: [materia_prima], references: [id_materia_prima], onDelete: NoAction, onUpdate: NoAction, map: "detalhes_materia_prima_materias_primas_id_materia_prima_fk")
 }
 
-model equip_link {
-  id           Int      @id(map: "PK_equip_link") @default(autoincrement())
-  creationDate DateTime @default(now(), map: "DF_equip_link_DATA") @db.DateTime
-  equipment    String   @db.VarChar(32)
-  to_equipment String   @db.VarChar(32)
-  description  String?  @db.VarChar(255)
+model detalhes_ordens_compra {
+  id_detalhes_ordem_compra Int             @id(map: "detalhes_ordens_compra_pk") @default(autoincrement())
+  ordem_compra             Int
+  materia_prima            Int
+  quantidade               Int
+  fornecedor               Int
+  fornecedores             fornecedores    @relation(fields: [fornecedor], references: [id_fornecedor], onDelete: NoAction, onUpdate: NoAction, map: "detalhes_ordens_compra_fornecedores_id_fornecedore_fk")
+  materias_primas          materias_primas @relation(fields: [materia_prima], references: [id_materia_prima], onDelete: NoAction, onUpdate: NoAction, map: "detalhes_ordens_compra_materias_primas_id_materia_prima_fk")
+  ordens_compra            ordens_compra   @relation(fields: [ordem_compra], references: [id_ordem_compra], onDelete: NoAction, onUpdate: NoAction, map: "detalhes_ordens_compra_ordens_compra_id_ordem_compra_fk")
 }
 
-model equip_phases {
-  id           Int      @id(map: "PK_equip_phases") @default(autoincrement())
-  creationDate DateTime @default(now(), map: "DF_equip_phases_DATA") @db.DateTime
-  phase        String   @db.VarChar(64)
-  description  String?  @db.VarChar(255)
+model detalhes_ordens_producao {
+  id_detalhes_ordem_producao Int             @id(map: "detalhes_ordens_producao_pk") @default(autoincrement())
+  ordem_producao             Int
+  user                       Int
+  data_hora_inicio           DateTime        @db.Timestamp(6)
+  data_hora_fim              DateTime        @db.Timestamp(6)
+  min_ph_desejado            Int
+  max_ph_desejado            Int?
+  data_hora_aprovacao        DateTime        @db.Timestamp(6)
+  data_hora_despejo          DateTime        @db.Timestamp(6)
+  ordens_producao            ordens_producao @relation(fields: [ordem_producao], references: [id_ordem_producao], onDelete: NoAction, onUpdate: NoAction, map: "detalhes_ordens_producao_ordens_producao_id_ordem_producao_fk")
+  users                      users           @relation(fields: [user], references: [id_user], onDelete: NoAction, onUpdate: NoAction, map: "detalhes_ordens_producao_users_id_user_fk")
 }
 
-model equip_phases_parameter {
-  id           Int      @id(map: "PK_equip_phases_parameter") @default(autoincrement())
-  creationDate DateTime @default(now(), map: "DF_equip_phases_parameter_DATA") @db.DateTime
-  phase        String   @db.VarChar(64)
-  parameter    String   @db.VarChar(32)
-  param_type   String   @db.VarChar(32)
-  engr_units   String?  @db.VarChar(32)
-  description  String?  @db.VarChar(255)
+model entrada_materia_prima {
+  id_entrada_materia_prima                                                                                         Int                                 @id(map: "entrada_materia_prima_pk") @default(autoincrement())
+  ordem_compra                                                                                                     Int
+  data_criacao                                                                                                     DateTime                            @default(now()) @db.Timestamp(6)
+  status                                                                                                           Int
+  user                                                                                                             Int
+  referencia                                                                                                       Int                                 @unique(map: "entrada_materia_prima_pk_2")
+  detalhes_entrada_materia_prima_detalhes_entrada_materia_prima_entrada_materia_primaToentrada_materia_prima       detalhes_entrada_materia_prima[]    @relation("detalhes_entrada_materia_prima_entrada_materia_primaToentrada_materia_prima")
+  ordens_compra                                                                                                    ordens_compra                       @relation(fields: [ordem_compra], references: [id_ordem_compra], onDelete: NoAction, onUpdate: NoAction, map: "entrada_materia_prima_ordens_compra_id_ordem_compra_fk")
+  users                                                                                                            users                               @relation(fields: [user], references: [id_user], onDelete: NoAction, onUpdate: NoAction, map: "entrada_materia_prima_users_id_user_fk")
+  status_entrada_materia_prima                                                                                     status_entrada_materia_prima        @relation(fields: [status], references: [id_status_entrada_materia_prima], onDelete: NoAction, onUpdate: NoAction, map: "entrada_mp_status_entrada_mp_id_status_entrada_mp_fk")
+  transaction_entrada_materia_prima_transaction_entrada_materia_prima_entrada_materia_primaToentrada_materia_prima transaction_entrada_materia_prima[] @relation("transaction_entrada_materia_prima_entrada_materia_primaToentrada_materia_prima")
 }
 
-model equip_property {
-  id             Int      @id(map: "PK_equip_property") @default(autoincrement())
-  creationDate   DateTime @default(now(), map: "DF_equip_property_DATA") @db.DateTime
-  equipment      String   @db.VarChar(32)
-  property       String   @db.VarChar(255)
-  property_value String?  @db.VarChar(32)
-  engr_units     String?  @db.VarChar(32)
-  description    String?  @db.VarChar(255)
+model fornecedores {
+  id_fornecedor          Int                      @id(map: "fornecedores_pk") @default(autoincrement())
+  nome                   String                   @unique(map: "unique_fornecedores_name") @db.VarChar(45)
+  detalhes_fornecedores  detalhes_fornecedores[]
+  detalhes_materia_prima detalhes_materia_prima[]
+  detalhes_ordens_compra detalhes_ordens_compra[]
 }
 
-model m_recipe_approvals {
-  id               Int      @id(map: "PK_m_recipe_approvals") @default(autoincrement())
-  creationDate     DateTime @default(now(), map: "DF_m_recipe_approvals_DATA") @db.DateTime
-  type             String   @db.VarChar(128)
-  author           String   @db.VarChar(128)
-  level            String?  @db.VarChar(255)
-  m_recipe         String   @db.VarChar(128)
-  m_recipe_version String   @db.VarChar(16)
-  description      String?  @db.VarChar(255)
+model materias_primas {
+  id_materia_prima               Int                              @id(map: "materias_primas_pk") @default(autoincrement())
+  artigo                         String                           @unique(map: "unique_materias_primas_artigo") @db.VarChar(45)
+  descricao                      String                           @db.VarChar(45)
+  detalhes_entrada_materia_prima detalhes_entrada_materia_prima[]
+  detalhes_materia_prima         detalhes_materia_prima[]
+  detalhes_ordens_compra         detalhes_ordens_compra[]
 }
 
-model m_recipe_control {
-  id           Int      @id(map: "PK_m_recipe_control") @default(autoincrement())
-  creationDate DateTime @default(now(), map: "DF_m_recipe_control_DATA") @db.DateTime
-  id_recipe    Int
-  step         Int
-  id_phase     Int
-  par_1        Int?
-  par_2        Float?
-  par_3        Int?
-  par_4        Int?
+model ordens_compra {
+  id_ordem_compra        Int                      @id(map: "ordens_compra_pk") @default(autoincrement())
+  referencia_ordem       Int                      @unique(map: "ordens_compra_pk_2")
+  data_criacao           DateTime                 @default(now()) @db.Timestamp(6)
+  status                 Int
+  detalhes_ordens_compra detalhes_ordens_compra[]
+  entrada_materia_prima  entrada_materia_prima[]
+  status_ordens_compra   status_ordens_compra     @relation(fields: [status], references: [id_status_ordens_compra], onDelete: NoAction, onUpdate: NoAction, map: "ordens_compra_status_id_status_fk")
 }
 
-model m_recipe_element {
-  id              Int      @id(map: "PK_m_recipe_element") @default(autoincrement())
-  creationDate    DateTime @default(now(), map: "DF_m_recipe_element_DATA") @db.DateTime
-  re              String   @db.VarChar(128)
-  re_version      String   @db.VarChar(16)
-  author          String?  @db.VarChar(32)
-  product         String?  @db.VarChar(32)
-  description     String?  @db.VarChar(255)
-  status          String?  @db.VarChar(128)
-  re_type         String?  @db.VarChar(32)
-  derived_re      String?  @db.VarChar(128)
-  derived_version String?  @db.VarChar(16)
-  default_batch   Int?
-  engr_units      String?  @db.VarChar(32)
-  steps_count     Int?
+model ordens_producao {
+  referencia                  Int                           @unique(map: "ordens_producao_pk_2")
+  status                      Int
+  lote_fabrico                Int
+  id_ordem_producao           Int                           @id(map: "ordens_producao_pk") @default(autoincrement())
+  produto                     Int                           @unique(map: "ordens_producao_pk_3")
+  quantidade                  Int
+  detalhes_ordens_producao    detalhes_ordens_producao[]
+  produtos                    produtos                      @relation(fields: [produto], references: [id_produto], onDelete: NoAction, onUpdate: NoAction, map: "ordens_producao_produtos_id_produto_fk")
+  status_ordens_producao      status_ordens_producao        @relation(fields: [status], references: [id_status_ordem_producao], onDelete: NoAction, onUpdate: NoAction, map: "ordens_producao_status_ordens_producao_id_status_ordem_producao")
+  transaction_ordens_producao transaction_ordens_producao[]
 }
 
-model m_recipe_element_equip {
-  id           Int      @id(map: "PK_m_recipe_element_equip") @default(autoincrement())
-  creationDate DateTime @default(now(), map: "DF_m_recipe_element_equip_DATA") @db.DateTime
-  re           String   @db.VarChar(128)
-  re_version   String   @db.VarChar(16)
-  equipment    String   @db.VarChar(32)
+model produtos {
+  id_produto      Int              @id(map: "produtos_pk") @default(autoincrement())
+  artigo          String           @unique(map: "produtos_pk_2") @db.VarChar(45)
+  descricao       String           @db.VarChar(75)
+  densidade       Decimal?         @db.Decimal(3, 2)
+  ordens_producao ordens_producao?
 }
 
-model m_recipe_element_parameter {
-  id              Int      @id(map: "PK_m_recipe_element_parameter") @default(autoincrement())
-  creationDate    DateTime @default(now(), map: "DF_m_recipe_element_parameter_DATA") @db.DateTime
-  re              String   @db.VarChar(128)
-  re_version      String   @db.VarChar(16)
-  parameter       String   @db.VarChar(32)
-  parameter_value String?  @db.VarChar(128)
-  engr_units      String?  @db.VarChar(32)
-  param_type      String   @db.VarChar(32)
+model roles {
+  id_role Int     @id(map: "roles_pk") @default(autoincrement())
+  name    String  @unique(map: "unique_role_name_pk") @db.VarChar(45)
+  users   users[]
 }
 
-model m_recipe_link {
-  id               Int      @id(map: "PK_m_recipe_link") @default(autoincrement())
-  creationDate     DateTime @default(now(), map: "DF_m_recipe_link_DATA") @db.DateTime
-  re               String   @db.VarChar(128)
-  re_version       String   @db.VarChar(16)
-  from_element     String   @db.VarChar(128)
-  to_element       String   @db.VarChar(128)
-  m_recipe         String   @db.VarChar(128)
-  m_recipe_version String   @db.VarChar(16)
-  parent_step      String   @db.VarChar(128)
+model status_entrada_materia_prima {
+  id_status_entrada_materia_prima   Int                                 @id(map: "status_entrada_materia_prima_pk") @default(autoincrement())
+  name                              String                              @db.VarChar(45)
+  entrada_materia_prima             entrada_materia_prima[]
+  transaction_entrada_materia_prima transaction_entrada_materia_prima[]
 }
 
-model m_recipe_step {
-  id               Int      @id(map: "PK_m_recipe_step") @default(autoincrement())
-  creationDate     DateTime @default(now(), map: "DF_m_recipe_step_DATA") @db.DateTime
-  step             String   @db.VarChar(128)
-  re               String   @db.VarChar(128)
-  re_version       String   @db.VarChar(16)
-  re_type          String   @db.VarChar(32)
-  m_recipe         String   @db.VarChar(128)
-  m_recipe_version String   @db.VarChar(16)
-  href             String?  @db.VarChar(255)
-  back_color       String?  @db.VarChar(128)
-  tree_priority    Int?
-  parent_id        Int?
-  phases_order     Int?
-  parent_step      String   @db.VarChar(128)
+model status_ordens_compra {
+  id_status_ordens_compra Int             @id(map: "status_pk") @default(autoincrement())
+  name                    String          @unique(map: "unique_status_name") @db.VarChar(45)
+  ordens_compra           ordens_compra[]
 }
 
-model m_recipe_step_parameter {
-  id               Int      @id(map: "PK_m_recipe_step_parameter") @default(autoincrement())
-  creationDate     DateTime @default(now(), map: "DF_m_recipe_step_parameter_DATA") @db.DateTime
-  step             String   @db.VarChar(128)
-  re               String   @db.VarChar(128)
-  re_version       String   @db.VarChar(16)
-  parameter        String   @db.VarChar(32)
-  parameter_value  String?  @db.VarChar(128)
-  engr_units       String?  @db.VarChar(32)
-  param_type       String   @db.VarChar(32)
-  m_recipe         String   @db.VarChar(128)
-  m_recipe_version String   @db.VarChar(16)
-  parent_step      String   @db.VarChar(128)
+model status_ordens_producao {
+  id_status_ordem_producao    Int                           @id(map: "status_ordens_producao_pk") @default(autoincrement())
+  name                        String                        @db.VarChar(45)
+  ordens_producao             ordens_producao[]
+  transaction_ordens_producao transaction_ordens_producao[]
 }
 
-model materials {
-  id           Int      @id(map: "PK_materials") @default(autoincrement())
-  creationDate DateTime @default(now(), map: "DF_materials_DATA") @db.DateTime
-  material     String   @db.VarChar(64)
-  type         String   @db.VarChar(32)
-  description  String?  @db.VarChar(255)
+model transaction_entrada_materia_prima {
+  id_transaction_entrada_materia_prima                                                                 Int                          @id(map: "transaction_entrada_materia_prima_pk") @default(autoincrement())
+  entrada_materia_prima                                                                                Int
+  timestamp                                                                                            DateTime                     @default(now()) @db.Timestamp(6)
+  status                                                                                               Int
+  status_entrada_materia_prima                                                                         status_entrada_materia_prima @relation(fields: [status], references: [id_status_entrada_materia_prima], onDelete: NoAction, onUpdate: NoAction, map: "tran_entrada_mp_status_entrada_mp_id_status_entrada_mp_fk")
+  entrada_materia_prima_transaction_entrada_materia_prima_entrada_materia_primaToentrada_materia_prima entrada_materia_prima        @relation("transaction_entrada_materia_prima_entrada_materia_primaToentrada_materia_prima", fields: [entrada_materia_prima], references: [id_entrada_materia_prima], onDelete: NoAction, onUpdate: NoAction, map: "transaction_entrada_mp_entrada_mp_id_entrada_mp_fk")
 }
 
-model materials_charac {
-  id             Int      @id(map: "PK_materials_charac") @default(autoincrement())
-  creationDate   DateTime @default(now(), map: "DF_materials_charac_DATA") @db.DateTime
-  material       String   @db.VarChar(64)
-  characteristic String   @db.VarChar(64)
-  default_value  String?  @db.VarChar(32)
-  engr_units     String?  @db.VarChar(32)
-  description    String?  @db.VarChar(255)
-}
-
-model materials_loc {
-  id           Int      @id(map: "PK_materials_loc") @default(autoincrement())
-  creationDate DateTime @default(now(), map: "DF_materials_loc_DATA") @db.DateTime
-  location     String   @db.VarChar(32)
-  material     String   @db.VarChar(64)
-  description  String?  @db.VarChar(255)
-}
-
-/// The underlying table does not contain a valid unique identifier and can therefore currently not be handled by Prisma Client.
-model REATOR_Recipe_Dados {
-  DataHora             DateTime  @db.DateTime
-  ID_Recipe            Int
-  Name                 String    @db.VarChar(128)
-  Quantidade           Int
-  Reator               Int
-  TPA                  Int
-  NumofSteps           Int?
-  Lote_Recipe          String?   @db.VarChar(20)
-  Reator_Volume_Final  Float?
-  RecipeCanceled       Boolean?
-  RecipeFinished       Boolean?
-  Data_Start           DateTime? @db.DateTime
-  Data_End             DateTime? @db.DateTime
-  Store                Boolean?
-  Saved                Boolean?
-  Step                 Int?
-  Phase                String?   @db.VarChar(32)
-  Nome_MP              String?   @db.VarChar(128)
-  Lote_TMP             Int?
-  Volume_Teorico       Float?
-  Volume_Real          Float?
-  Volume_Reator_Step   Float?
-  Par_1                Int?
-  Par_2                Int?
-  Status_Recipe        Int?
-  DataHora_Inicio_Step DateTime? @db.DateTime
-  DataHora_Fim_Step    DateTime? @db.DateTime
-  Alarmes              String?   @db.Text
-
-  @@ignore
-}
-
-model sysdiagrams {
-  name         String @db.NVarChar(128)
-  principal_id Int
-  diagram_id   Int    @id(map: "PK__sysdiagr__C2B05B61BB25E080") @default(autoincrement())
-  version      Int?
-  definition   Bytes?
-
-  @@unique([principal_id, name], map: "UK_principal_name")
-}
-
-/// The underlying table does not contain a valid unique identifier and can therefore currently not be handled by Prisma Client.
-model TMP_Load_Dados {
-  DataHora              DateTime  @db.DateTime
-  ID_TMP                Int
-  ID_Destiny            Int
-  Lote                  Int
-  Data_Start            DateTime? @db.DateTime
-  Data_End              DateTime? @db.DateTime
-  Operation             String?   @db.Text
-  Tanque_Volume_Inicial Float?
-  Tanque_Volume_Final   Float?
-  Tanque_Volume_Teorico Float?
-  Tanque_Volume_Load    Float?
-  Store                 Boolean?
-  Saved                 Boolean?
-  Alarms                String?   @db.Text
-
-  @@ignore
-}
-
-model units_measure {
-  id            Int      @id(map: "PK_units_measure") @default(autoincrement())
-  creationDate  DateTime @default(now(), map: "DF_units_measure_DATA") @db.DateTime
-  engr_units    String   @db.VarChar(32)
-  recipe_header Boolean
-  description   String?  @db.VarChar(255)
+model transaction_ordens_producao {
+  id_transaction_ordem_producao Int                    @id(map: "transaction_ordens_producao_pk") @default(autoincrement())
+  timestamp                     DateTime               @default(now()) @db.Timestamp(6)
+  ordem_producao                Int
+  status                        Int
+  ordens_producao               ordens_producao        @relation(fields: [ordem_producao], references: [id_ordem_producao], onDelete: NoAction, onUpdate: NoAction, map: "transaction_ordens_producao_ordens_producao_id_ordem_producao_f")
+  status_ordens_producao        status_ordens_producao @relation(fields: [status], references: [id_status_ordem_producao], onDelete: NoAction, onUpdate: NoAction, map: "transaction_ordens_producao_status_ordens_producao_id_status_or")
 }
 
 model users {
-  id           Int      @id(map: "PK_users") @default(autoincrement())
-  creationDate DateTime @default(now(), map: "DF_users_DATA") @db.DateTime
-  username     String   @db.VarChar(128)
-  name         String   @db.VarChar(128)
-  password     String   @db.VarChar(255)
-  level        String   @db.VarChar(128)
-  status       Boolean
-}
-
-model users_error_logs {
-  id           Int      @id(map: "PK_users_error_logs") @default(autoincrement())
-  creationDate DateTime @default(now(), map: "DF_users_error_logs_DATA") @db.DateTime
-  username     String   @db.VarChar(128)
-  password     String   @db.VarChar(255)
-}
-
-model users_levels {
-  id           Int      @id(map: "PK_users_levels") @default(autoincrement())
-  creationDate DateTime @default(now(), map: "DF_users_levels_DATA") @db.DateTime
-  level        String   @unique(map: "UQ__users_le__C03A140A1791671F") @db.VarChar(128)
-  description  String?  @db.VarChar(128)
-}
-
-model users_logs {
-  id           Int      @id(map: "PK_users_logs") @default(autoincrement())
-  creationDate DateTime @default(now(), map: "DF_users_logs_DATA") @db.DateTime
-  username     String   @db.VarChar(128)
+  id_user                  Int                        @id(map: "table_name_pk") @default(autoincrement())
+  user_name                String                     @unique(map: "users_pk") @db.VarChar(45)
+  password                 String                     @db.VarChar(45)
+  role                     Int
+  data_criacao             DateTime                   @default(now()) @db.Timestamp(6)
+  detalhes_ordens_producao detalhes_ordens_producao[]
+  entrada_materia_prima    entrada_materia_prima[]
+  roles                    roles                      @relation(fields: [role], references: [id_role], onDelete: NoAction, onUpdate: NoAction, map: "users_roles_id_role_fk")
 }
