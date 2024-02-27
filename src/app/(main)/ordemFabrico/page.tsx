@@ -55,52 +55,6 @@ const page = () => {
       <section className="border-2 border-slate-600 rounded-md p-7 shadow-2xl">
         <h1 className="text-lg mb-3">Ordens de Fabrico</h1>
         <div className="flex flex-row gap-5">
-          <div>
-            <h1 className="text-md">Filtros</h1>
-            <Form {...form}>
-              <form onSubmit={form.handleSubmit(onSubmit)}>
-                <FormField
-                  name="produto"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Produto</FormLabel>
-                      <FormControl>
-                        <Input placeholder="produto" {...field} />
-                      </FormControl>
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  name="estado"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Estado</FormLabel>
-                      <FormControl>
-                        <Input placeholder="estado" {...field} />
-                      </FormControl>
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  name="ordemFabrico"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Ordem Fabrico</FormLabel>
-                      <FormControl>
-                        <Input placeholder="ordemFabrico" {...field} />
-                      </FormControl>
-                    </FormItem>
-                  )}
-                />
-                <Button
-                  className="mt-2 rounded-full bg-slate-600"
-                  type="submit"
-                >
-                  <Search />
-                </Button>
-              </form>
-            </Form>
-          </div>
           <div className="flex flex-row ml-auto mr-0 gap-5 ">
             <Card className="border-2 border-lime-500 flex flex-col shadow-md">
               <CardHeader>
@@ -221,3 +175,52 @@ const page = () => {
 };
 
 export default page;
+
+/*
+          <div>
+            <h1 className="text-md">Filtros</h1>
+            <Form {...form}>
+              <form onSubmit={form.handleSubmit(onSubmit)}>
+                <FormField
+                  name="produto"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Produto</FormLabel>
+                      <FormControl>
+                        <Input placeholder="produto" {...field} />
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  name="estado"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Estado</FormLabel>
+                      <FormControl>
+                        <Input placeholder="estado" {...field} />
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  name="ordemFabrico"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Ordem Fabrico</FormLabel>
+                      <FormControl>
+                        <Input placeholder="ordemFabrico" {...field} />
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
+                <Button
+                  className="mt-2 rounded-full bg-slate-600"
+                  type="submit"
+                >
+                  <Search />
+                </Button>
+              </form>
+            </Form>
+          </div>
+*/
