@@ -1,3 +1,4 @@
+"use client";
 import { ordemProducao } from "../../../../public/assets/mockData/ordensFabrico";
 import { ColumnDef } from "@tanstack/react-table";
 
