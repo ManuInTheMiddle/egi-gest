@@ -54,7 +54,7 @@ export default function DataTable<TData, TValue>({
           className="max-w-sm"
         />
         <Input
-          placeholder="Filtrar lote ... "
+          placeholder="Filtrar Lote ... "
           value={
             (table.getColumn("loteFabrico")?.getFilterValue() as string) ?? ""
           }
