@@ -1,4 +1,4 @@
-interface IordensProducao {
+export type ordemProducao = {
   id: number;
   //numero de artigo do produto
   referencia: string;
@@ -8,17 +8,22 @@ interface IordensProducao {
   descricao: string;
   //quantidade a produzir
   quantidade: number;
-  status: string;
-}
+  status:
+    | "Por Validar"
+    | "Validada"
+    | "A Decorrer"
+    | "Finalizada"
+    | "Cancelada";
+};
 
-export const ordensProducao: IordensProducao[] = [
+export const ordensProducao: ordemProducao[] = [
   {
     id: 1,
     referencia: "200A",
     loteFabrico: "200A10",
     descricao: "Sabonete Liquido Azul",
     quantidade: 1000,
-    status: "Por validar",
+    status: "Por Validar",
   },
   {
     id: 2,
@@ -42,7 +47,7 @@ export const ordensProducao: IordensProducao[] = [
     loteFabrico: "40050",
     descricao: "Cera Incolor",
     quantidade: 9950,
-    status: "Finalizado",
+    status: "Finalizada",
   },
   {
     id: 5,
@@ -50,7 +55,7 @@ export const ordensProducao: IordensProducao[] = [
     loteFabrico: "81310",
     descricao: "DT HIDRO-FB",
     quantidade: 6000,
-    status: "Cancelado",
+    status: "Cancelada",
   },
   {
     id: 6,
@@ -58,7 +63,7 @@ export const ordensProducao: IordensProducao[] = [
     loteFabrico: "234E30",
     descricao: "Desengordurante Verde",
     quantidade: 6000,
-    status: "Validado",
+    status: "Validada",
   },
   {
     id: 7,
