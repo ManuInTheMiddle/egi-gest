@@ -1,5 +1,6 @@
 "use client";
 import React, { useState } from "react";
+import { ScrollText } from "lucide-react";
 import {
   ColumnFiltersState,
   getFilteredRowModel,
@@ -19,6 +20,7 @@ import {
 } from "@/components/ui/table";
 
 import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -44,25 +46,34 @@ export default function DataTable<TData, TValue>({
 
   return (
     <div>
-      <div className="flex items-center py-4 gap-x-2">
-        <Input
-          placeholder="Filtrar Status ... "
-          value={(table.getColumn("status")?.getFilterValue() as string) ?? ""}
-          onChange={(e) =>
-            table.getColumn("status")?.setFilterValue(e.target.value)
-          }
-          className="max-w-sm"
-        />
-        <Input
-          placeholder="Filtrar Lote ... "
-          value={
-            (table.getColumn("loteFabrico")?.getFilterValue() as string) ?? ""
-          }
-          onChange={(e) =>
-            table.getColumn("loteFabrico")?.setFilterValue(e.target.value)
-          }
-          className="max-w-sm"
-        />
+      <div className="flex flex-row items-center justify-between gap-4">
+        <div className="flex items-center py-4 gap-x-2">
+          <Input
+            placeholder="Filtrar Status ... "
+            value={
+              (table.getColumn("status")?.getFilterValue() as string) ?? ""
+            }
+            onChange={(e) =>
+              table.getColumn("status")?.setFilterValue(e.target.value)
+            }
+            className="max-w-sm"
+          />
+          <Input
+            placeholder="Filtrar Lote ... "
+            value={
+              (table.getColumn("loteFabrico")?.getFilterValue() as string) ?? ""
+            }
+            onChange={(e) =>
+              table.getColumn("loteFabrico")?.setFilterValue(e.target.value)
+            }
+            className="max-w-sm"
+          />
+        </div>
+        <div className="flex mr-3">
+          <Button>
+            <ScrollText />
+          </Button>
+        </div>
       </div>
       <div className="rounded-md border-2 border-lime-500">
         <Table>
