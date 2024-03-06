@@ -8,12 +8,7 @@ export type ordemProducao = {
   descricao: string;
   //quantidade a produzir
   quantidade: number;
-  status:
-    | "Por Validar"
-    | "Validada"
-    | "A Decorrer"
-    | "Finalizada"
-    | "Cancelada";
+  status: "Planeada" | "A Decorrer" | "Finalizada" | "Cancelada";
 };
 
 export const ordensProducao: ordemProducao[] = [
@@ -23,7 +18,7 @@ export const ordensProducao: ordemProducao[] = [
     loteFabrico: "200A10",
     descricao: "Sabonete Liquido Azul",
     quantidade: 1000,
-    status: "Por Validar",
+    status: "Planeada",
   },
   {
     id: 2,
@@ -31,7 +26,7 @@ export const ordensProducao: ordemProducao[] = [
     loteFabrico: "214d30",
     descricao: "Lava Louça Manual",
     quantidade: 5000,
-    status: "Validada",
+    status: "A Decorrer",
   },
   {
     id: 3,
@@ -63,7 +58,7 @@ export const ordensProducao: ordemProducao[] = [
     loteFabrico: "234E30",
     descricao: "Desengordurante Verde",
     quantidade: 6000,
-    status: "Validada",
+    status: "A Decorrer",
   },
   {
     id: 7,
@@ -71,6 +66,6 @@ export const ordensProducao: ordemProducao[] = [
     loteFabrico: "82235",
     descricao: "RIMS T (Alcalino)- Detergente de lavagem",
     quantidade: 7500,
-    status: "Por Validar",
+    status: "Planeada",
   },
 ];
