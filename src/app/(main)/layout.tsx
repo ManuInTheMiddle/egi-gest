@@ -20,14 +20,14 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className="no-scrollbar">
-      <Providers>
+      <body>
         <section className={inter.className}>
           <Navbar />
           <Options />
           {children}
           <Footer />
         </section>
-      </Providers>
+      </body>
     </html>
   );
 }

@@ -18,16 +18,7 @@ import {
   TableHead,
   TableCell,
 } from "@/components/ui/table";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import {
-  Form,
-  FormItem,
-  FormField,
-  FormControl,
-  FormLabel,
-} from "@/components/ui/form";
-import { Search } from "lucide-react";
+
 import ProgressoFabrico from "./progressoFabrico";
 
 const formSchema = z.object({
@@ -53,7 +44,7 @@ const page = () => {
   return (
     <div className="m-4 mt-10">
       <section className="border-2 border-slate-600 rounded-md p-7 shadow-2xl">
-        <h1 className="text-lg mb-3">Ordens de Fabrico</h1>
+        <h1 className="text-lg mb-3 text">Ordens de Fabrico</h1>
         <div className="flex flex-row gap-5">
           <div className="flex flex-row ml-auto mr-0 gap-5 ">
             <Card className="border-2 border-lime-500 flex flex-col shadow-md">

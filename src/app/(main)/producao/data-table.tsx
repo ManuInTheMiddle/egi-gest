@@ -1,6 +1,6 @@
 "use client";
 import React, { useState } from "react";
-import { ScrollText } from "lucide-react";
+import { ScrollText, ArrowLeft, ArrowRight } from "lucide-react";
 import {
   ColumnFiltersState,
   getFilteredRowModel,
@@ -132,6 +132,16 @@ export default function DataTable<TData, TValue>({
             )}
           </TableBody>
         </Table>
+      </div>
+      <div className="flex justify-center mt-3 gap-x-2">
+        <Button variant={"outline"} className="gap-x-1 max-w-[120] ">
+          <ArrowLeft color="#475569" />
+          Prev
+        </Button>
+        <Button variant={"outline"} className="gap-x-1 max-w-[120]">
+          Next
+          <ArrowRight color="#475569" />
+        </Button>
       </div>
     </div>
   );
