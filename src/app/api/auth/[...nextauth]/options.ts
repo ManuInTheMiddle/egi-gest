@@ -63,10 +63,9 @@ export const options: NextAuthOptions = {
           role: "user",
           username: "User",
           email: "jpm.user@jpm.pt",
-          password: "JPM_4528",
+          password: "User_4528",
         };
 
-        
         const dashboard = {
           id: "15123",
           role: "dashboard",
@@ -80,7 +79,7 @@ export const options: NextAuthOptions = {
           role: "chegadaMP",
           username: "ChegadaMP",
           email: "chegadaMP@jpm.pt",
-          password: "JPM_4528",
+          password: "ChegadaMP_4528",
         };
 
         const ordensFabrico = {
@@ -142,8 +141,6 @@ export const options: NextAuthOptions = {
         } else {
           return null;
         }
-
-
       },
     }),
   ],
