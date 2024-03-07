@@ -17,5 +17,10 @@ export const GET = async (req: NextRequest) => {
     });
 
     return NextResponse.json({ message: "OK", materiaPrima }, { status: 200 });
-  } catch (error) {}
+  } catch (error) {
+    return NextResponse.json(
+      { error: "Erro ao devolver materia prima" },
+      { status: 503 }
+    );
+  }
 };
