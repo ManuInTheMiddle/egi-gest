@@ -85,6 +85,7 @@ model materias_primas {
   id_materia_prima               Int                              @id(map: "materias_primas_pk") @default(autoincrement())
   artigo                         String                           @unique(map: "unique_materias_primas_artigo") @db.VarChar(45)
   descricao                      String                           @db.VarChar(45)
+  codigo_qr                      String?                          @db.VarChar(50)
   detalhes_entrada_materia_prima detalhes_entrada_materia_prima[]
   detalhes_materia_prima         detalhes_materia_prima[]
   detalhes_ordens_compra         detalhes_ordens_compra[]
@@ -101,24 +102,28 @@ model ordens_compra {
 }
 
 model ordens_producao {
-  referencia                  Int                           @unique(map: "ordens_producao_pk_2")
   status                      Int
-  lote_fabrico                Int
+  lote_fabrico                String                        @db.VarChar(10)
   id_ordem_producao           Int                           @id(map: "ordens_producao_pk") @default(autoincrement())
   produto                     Int                           @unique(map: "ordens_producao_pk_3")
   quantidade                  Int
+  data_criacao                DateTime                      @default(now()) @db.Timestamptz(6)
+  controlo_qualidade          controlo_qualidade[]
   detalhes_ordens_producao    detalhes_ordens_producao[]
+  ordens_enchimento           ordens_enchimento[]
   produtos                    produtos                      @relation(fields: [produto], references: [id_produto], onDelete: NoAction, onUpdate: NoAction, map: "ordens_producao_produtos_id_produto_fk")
   status_ordens_producao      status_ordens_producao        @relation(fields: [status], references: [id_status_ordem_producao], onDelete: NoAction, onUpdate: NoAction, map: "ordens_producao_status_ordens_producao_id_status_ordem_producao")
+  produto_intermedio          produto_intermedio[]
   transaction_ordens_producao transaction_ordens_producao[]
 }
 
 model produtos {
-  id_produto      Int              @id(map: "produtos_pk") @default(autoincrement())
-  artigo          String           @unique(map: "produtos_pk_2") @db.VarChar(45)
-  descricao       String           @db.VarChar(75)
-  densidade       Decimal?         @db.Decimal(3, 2)
-  ordens_producao ordens_producao?
+  id_produto         Int                  @id(map: "produtos_pk") @default(autoincrement())
+  artigo             String               @unique(map: "produtos_pk_2") @db.VarChar(45)
+  descricao          String               @db.VarChar(75)
+  densidade          Decimal?             @db.Decimal(3, 2)
+  ordens_producao    ordens_producao?
+  produto_intermedio produto_intermedio[]
 }
 
 model roles {
@@ -166,12 +171,101 @@ model transaction_ordens_producao {
 }
 
 model users {
-  id_user                  Int                        @id(map: "table_name_pk") @default(autoincrement())
-  user_name                String                     @unique(map: "users_pk") @db.VarChar(45)
-  password                 String                     @db.VarChar(45)
-  role                     Int
-  data_criacao             DateTime                   @default(now()) @db.Timestamp(6)
-  detalhes_ordens_producao detalhes_ordens_producao[]
-  entrada_materia_prima    entrada_materia_prima[]
-  roles                    roles                      @relation(fields: [role], references: [id_role], onDelete: NoAction, onUpdate: NoAction, map: "users_roles_id_role_fk")
+  id_user                                                       Int                        @id(map: "table_name_pk") @default(autoincrement())
+  user_name                                                     String                     @unique(map: "users_pk") @db.VarChar(45)
+  password                                                      String                     @db.VarChar(45)
+  role                                                          Int
+  data_criacao                                                  DateTime                   @default(now()) @db.Timestamp(6)
+  controlo_qualidade_controlo_qualidade_operador_analisaTousers controlo_qualidade[]       @relation("controlo_qualidade_operador_analisaTousers")
+  controlo_qualidade_controlo_qualidade_operador_validaTousers  controlo_qualidade[]       @relation("controlo_qualidade_operador_validaTousers")
+  detalhes_ordens_producao                                      detalhes_ordens_producao[]
+  entrada_materia_prima                                         entrada_materia_prima[]
+  ordens_enchimento                                             ordens_enchimento[]
+  roles                                                         roles                      @relation(fields: [role], references: [id_role], onDelete: NoAction, onUpdate: NoAction, map: "users_roles_id_role_fk")
+}
+
+model clientes {
+  id_cliente       Int                @id(map: "clientes_pk") @default(autoincrement())
+  nome             String             @db.VarChar(15)
+  ordens_rotulagem ordens_rotulagem[]
+}
+
+model controlo_qualidade {
+  id_controlo_qualidade                            Int             @id(map: "controlo_qualidade_pk") @default(autoincrement())
+  ordem_producao                                   Int
+  data_hora_analises                               DateTime        @db.Date
+  operador_valida                                  Int
+  operador_analisa                                 Int
+  resultado                                        String          @db.VarChar(45)
+  observacoes                                      String?         @db.VarChar(255)
+  ordens_producao                                  ordens_producao @relation(fields: [ordem_producao], references: [id_ordem_producao], onDelete: NoAction, onUpdate: NoAction, map: "controlo_qualidade_ordens_producao_id_ordem_producao_fk")
+  users_controlo_qualidade_operador_analisaTousers users           @relation("controlo_qualidade_operador_analisaTousers", fields: [operador_analisa], references: [id_user], onDelete: NoAction, onUpdate: NoAction, map: "controlo_qualidade_users_id_user_fk")
+  users_controlo_qualidade_operador_validaTousers  users           @relation("controlo_qualidade_operador_validaTousers", fields: [operador_valida], references: [id_user], onDelete: NoAction, onUpdate: NoAction, map: "controlo_qualidade_users_id_user_fk_2")
+}
+
+model embalagens {
+  id_embalagem      Int                 @id(map: "embalagens_pk") @default(autoincrement())
+  tipo_embalagem    String              @db.VarChar(15)
+  ordens_enchimento ordens_enchimento[]
+}
+
+model enchedoras {
+  id_enchedora      Int                 @id(map: "maquinas_enchimento_pk") @default(autoincrement())
+  descricao         String              @db.VarChar(15)
+  ordens_enchimento ordens_enchimento[]
+}
+
+model ordens_enchimento {
+  id_enchimento      Int             @id(map: "enchimento_pk") @default(autoincrement())
+  referencia         String          @db.VarChar(10)
+  lote_producao      Int
+  quantidade         Int
+  tipo_tampa         Int
+  tipo_embalagem     Int
+  maquina_enchimento Int
+  data_hora_inicio   DateTime        @db.Timestamp(6)
+  data_hora_fim      DateTime        @db.Timestamp(6)
+  operador           Int
+  embalagens         embalagens      @relation(fields: [tipo_embalagem], references: [id_embalagem], onDelete: NoAction, onUpdate: NoAction, map: "enchimento_embalagens_id_embalagem_fk")
+  enchedoras         enchedoras      @relation(fields: [maquina_enchimento], references: [id_enchedora], onDelete: NoAction, onUpdate: NoAction, map: "enchimento_maquinas_enchimento_id_maquina_enchimento_fk")
+  ordens_producao    ordens_producao @relation(fields: [lote_producao], references: [id_ordem_producao], onDelete: NoAction, onUpdate: NoAction, map: "enchimento_ordens_producao_id_ordem_producao_fk")
+  tampas             tampas          @relation(fields: [tipo_tampa], references: [id_tampa], onDelete: NoAction, onUpdate: NoAction, map: "enchimento_tampas_id_tampa_fk")
+  users              users           @relation(fields: [operador], references: [id_user], onDelete: NoAction, onUpdate: NoAction, map: "enchimento_users_id_user_fk")
+}
+
+model ordens_rotulagem {
+  id_rotulagem   Int      @id(map: "ordens_rotulagem_pk") @default(autoincrement())
+  cliente        Int
+  numero_paletes Int
+  data           DateTime @db.Date
+  clientes       clientes @relation(fields: [cliente], references: [id_cliente], onDelete: NoAction, onUpdate: NoAction, map: "ordens_rotulagem_clientes_id_cliente_fk")
+}
+
+model produto_intermedio {
+  id_produto_intermedio Int             @id(map: "produto_intermedio_pk") @default(autoincrement())
+  referencia            Int
+  lote_producao         Int
+  ordens_producao       ordens_producao @relation(fields: [lote_producao], references: [id_ordem_producao], onDelete: NoAction, onUpdate: NoAction, map: "produto_intermedio_ordens_producao_id_ordem_producao_fk")
+  produtos              produtos        @relation(fields: [referencia], references: [id_produto], onDelete: NoAction, onUpdate: NoAction, map: "produto_intermedio_produtos_id_produto_fk")
+}
+
+model reatores {
+  id_reator Int     @id(map: "reatores_pk") @default(autoincrement())
+  codigo_qr String? @db.VarChar(50)
+  descricao String  @db.VarChar(12)
+}
+
+/// The underlying table does not contain a valid unique identifier and can therefore currently not be handled by Prisma Client.
+model tabela_qr_reader_app {
+  id        Int       @id(map: "tabela_qr_reader_app_pk") @default(autoincrement())
+  reator    String    @db.VarChar
+  timestamp DateTime? @db.Timestamptz(6)
+
+  @@ignore
+}
+
+model tampas {
+  id_tampa          Int                 @id(map: "tampas_pk") @default(autoincrement())
+  tipo_tampa        String              @db.VarChar(15)
+  ordens_enchimento ordens_enchimento[]
 }
