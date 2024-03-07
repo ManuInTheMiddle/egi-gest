@@ -10,7 +10,7 @@ export const GET = async () => {
     );
   } catch (error) {
     return NextResponse.json(
-      { error: "Erro ao devolver dados" },
+      { error: "Erro ao devolver materias primas" },
       { status: 503 }
     );
   }
