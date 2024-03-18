@@ -9,6 +9,8 @@ import {
   getCoreRowModel,
   useReactTable,
   getPaginationRowModel,
+  SortingState,
+  getSortedRowModel,
 } from "@tanstack/react-table";
 
 import {
@@ -33,6 +35,7 @@ export default function DataTable<TData, TValue>({
   data,
 }: DataTableProps<TData, TValue>) {
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
+  const [sorting, setSorting] = useState<SortingState>([]);
 
   const table = useReactTable({
     data,
@@ -41,8 +44,11 @@ export default function DataTable<TData, TValue>({
     onColumnFiltersChange: setColumnFilters,
     getFilteredRowModel: getFilteredRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
+    onSortingChange: setSorting,
+    getSortedRowModel: getSortedRowModel(),
     state: {
       columnFilters,
+      sorting,
     },
   });
 
@@ -63,10 +69,11 @@ export default function DataTable<TData, TValue>({
           <Input
             placeholder="Filtrar Lote ... "
             value={
-              (table.getColumn("loteFabrico")?.getFilterValue() as string) ?? ""
+              (table.getColumn("lote_fabrico")?.getFilterValue() as string) ??
+              ""
             }
             onChange={(e) =>
-              table.getColumn("loteFabrico")?.setFilterValue(e.target.value)
+              table.getColumn("lote_fabrico")?.setFilterValue(e.target.value)
             }
             className="max-w-sm"
           />
