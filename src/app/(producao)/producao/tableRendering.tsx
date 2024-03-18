@@ -1,9 +1,8 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useAppSelector, useAppDispatch } from "@/redux/hooks";
 import { getOrders } from "@/redux/ordemProducao/ordemProducaoSlice";
 import DataTable from "./data-table";
-import { OrdemProducao } from "@/types";
 import ColumnsComponent from "./columns";
 
 const TableRendering = () => {
@@ -16,12 +15,12 @@ const TableRendering = () => {
     fetch(`http://localhost:3000/api/ordensProducao`)
       .then((res) => res.json())
       .then((data) => {
-        //  setData(data.ordensProducao);
         dispatch(getOrders(data.ordensProducao));
+        //setData(data.ordensProducao);
         //console.log(orders);
         //console.log(data.ordensProducao);
       });
-  }, []);
+  }, [orders]);
   return <DataTable columns={ColumnsComponent} data={orders} />;
 };
 
