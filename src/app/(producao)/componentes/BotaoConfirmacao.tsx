@@ -1,5 +1,6 @@
 "use client";
 import React from "react";
+import axios from "axios";
 import { estadosOrdem } from "./estados";
 import {
   AlertDialog,
@@ -30,7 +31,26 @@ const BotaoConfirmacao = ({ ordem, estadoOrdem }: propsBotao) => {
   const dispatch = useAppDispatch();
 
   const { toast } = useToast();
-
+  const handleOrdemProducaoTransaction = async (
+    idOrdem: number,
+    EstadoAnterior: string,
+    idEstadoNovo: number
+  ) => {
+    const idEstadoAnterior = estadosOrdem.find(
+      (estado) => estado.estado == EstadoAnterior
+    );
+    try {
+      await axios
+        .post("http://localhost:3000/api/ordensProducao/historico", {
+          ordemProducao: idOrdem,
+          statusAnterior: idEstadoAnterior?.id,
+          statusNovo: idEstadoNovo,
+        })
+        .then(async (Response) => await console.log(Response.data));
+    } catch (error) {
+      console.error(error);
+    }
+  };
   const handleAtualizacaoEstado = async (idOrdem: number, estado: number) => {
     try {
       await fetch(
@@ -65,7 +85,7 @@ const BotaoConfirmacao = ({ ordem, estadoOrdem }: propsBotao) => {
       console.error("Erro ao atualizar estado da ordem", error);
     }
   };
-  const estadoNovoString = estadosOrdem.filter((estado) => {
+  const estadoNovoString = estadosOrdem.find((estado) => {
     if (estado.value === estadoOrdem) {
       return estado;
     }
@@ -86,10 +106,14 @@ const BotaoConfirmacao = ({ ordem, estadoOrdem }: propsBotao) => {
         </AlertDialogHeader>
         <div className="flex flex-row gap-3  items-center">
           <Label className="text-red-400">
-            {ordem.status_ordens_producao.name}{" "}
+            {ordem.status_ordens_producao.name}
           </Label>
           <Redo strokeWidth={1.5} />
-          <Label className="text-green-700">{estadoNovoString[0].estado}</Label>
+          <Label className="text-green-700">
+            {estadoNovoString
+              ? estadoNovoString?.estado
+              : "!!NÃO HOUVE ALTERAÇÃO!!"}
+          </Label>
         </div>
         <AlertDialogFooter>
           <AlertDialogCancel>Cancelar</AlertDialogCancel>
@@ -97,6 +121,11 @@ const BotaoConfirmacao = ({ ordem, estadoOrdem }: propsBotao) => {
             onClick={() => {
               handleAtualizacaoEstado(
                 ordem.id_ordem_producao,
+                parseInt(estadoOrdem)
+              );
+              handleOrdemProducaoTransaction(
+                ordem.id_ordem_producao,
+                ordem.status_ordens_producao.name,
                 parseInt(estadoOrdem)
               );
             }}
