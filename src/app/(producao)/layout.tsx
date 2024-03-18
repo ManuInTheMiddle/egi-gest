@@ -3,7 +3,7 @@ import { Inter } from "next/font/google";
 import "../globals.css";
 import { Toaster } from "@/components/ui/toaster";
 import TanstackProvider from "../../../providers/TanstackProvider";
-
+import StoreProvider from "../StoreProvider";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
@@ -20,7 +20,9 @@ export default function RootLayout({
     <html lang="en" className="no-scrollbar">
       <body className={inter.className}>
         <TanstackProvider>
-          <section>{children}</section>
+          <section>
+            <StoreProvider>{children}</StoreProvider>
+          </section>
         </TanstackProvider>
         <Toaster />
       </body>
