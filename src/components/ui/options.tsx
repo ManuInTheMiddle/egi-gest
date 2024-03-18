@@ -23,8 +23,8 @@ export default function Options() {
       href: "/chegadaMateriaPrima",
     },
     {
-      label: "ordemFabrico",
-      href: "/ordemFabrico",
+      label: "ordemProducao",
+      href: "/ordemProducao",
     },
     {
       label: "producao",
@@ -70,7 +70,7 @@ export default function Options() {
           </CardFooter>
         </Card>
       </a>
-      <a href="ordemFabrico">
+      <a href="ordemProducao">
         <Card
           className={`${
             links[2].href.startsWith(currentPathname.toString())
@@ -82,7 +82,7 @@ export default function Options() {
             <ClipboardList />
           </CardContent>
           <CardFooter>
-            <p>Ordens de Fabrico</p>
+            <p>Ordens de Produção</p>
           </CardFooter>
         </Card>
       </a>
