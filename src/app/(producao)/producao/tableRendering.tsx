@@ -8,7 +8,7 @@ import ColumnsComponent from "./columns";
 
 const TableRendering = () => {
   //const [data, setData] = useState<OrdemProducao[]>([]);
-  const orders = useAppSelector((state) => state.ordemProducao);
+  const orders = useAppSelector((state) => state.ordemProducao.orders);
   const dispatch = useAppDispatch();
 
   useEffect(() => {
@@ -18,11 +18,11 @@ const TableRendering = () => {
       .then((data) => {
         //  setData(data.ordensProducao);
         dispatch(getOrders(data.ordensProducao));
-        //console.log(orders.orders);
+        //console.log(orders);
         //console.log(data.ordensProducao);
       });
   }, []);
-  return <DataTable columns={ColumnsComponent} data={orders.orders} />;
+  return <DataTable columns={ColumnsComponent} data={orders} />;
 };
 
 export default TableRendering;
