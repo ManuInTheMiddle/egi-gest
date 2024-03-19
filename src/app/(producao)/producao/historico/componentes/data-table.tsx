@@ -1,6 +1,6 @@
 "use client";
 import React, { useState } from "react";
-import { ScrollText, ArrowLeft, ArrowRight } from "lucide-react";
+
 import {
   ColumnFiltersState,
   getFilteredRowModel,
@@ -19,9 +19,8 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-
-import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -53,10 +52,10 @@ export default function DataTable<TData, TValue>({
           <Input
             placeholder="Filtrar Status ... "
             value={
-              (table.getColumn("status")?.getFilterValue() as string) ?? ""
+              (table.getColumn("estadoNovo")?.getFilterValue() as string) ?? ""
             }
             onChange={(e) =>
-              table.getColumn("status")?.setFilterValue(e.target.value)
+              table.getColumn("estadoNovo")?.setFilterValue(e.target.value)
             }
             className="max-w-sm"
           />
@@ -71,11 +70,7 @@ export default function DataTable<TData, TValue>({
             className="max-w-sm"
           />
         </div>
-        <div className="flex mr-3">
-          <Button>
-            <ScrollText />
-          </Button>
-        </div>
+        <div className="flex mr-3"></div>
       </div>
       <div className="rounded-md border-2 border-lime-500">
         <Table>
@@ -133,16 +128,56 @@ export default function DataTable<TData, TValue>({
           </TableBody>
         </Table>
       </div>
-      <div className="flex justify-center mt-3 gap-x-2">
-        <Button variant={"outline"} className="gap-x-1 max-w-[120] ">
-          <ArrowLeft color="#475569" />
-          Prev
-        </Button>
-        <Button variant={"outline"} className="gap-x-1 max-w-[120]">
-          Next
-          <ArrowRight color="#475569" />
-        </Button>
-      </div>
     </div>
   );
 }
+/*
+import {
+  Pagination,
+  PaginationContent,
+  PaginationEllipsis,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination"
+ 
+export function PaginationDemo() {
+  return (
+    <Pagination>
+      <PaginationContent>
+        <PaginationItem>
+          <PaginationPrevious href="#" />
+        </PaginationItem>
+        <PaginationItem>
+          <PaginationLink href="#">1</PaginationLink>
+        </PaginationItem>
+        <PaginationItem>
+          <PaginationLink href="#" isActive>
+            2
+          </PaginationLink>
+        </PaginationItem>
+        <PaginationItem>
+          <PaginationLink href="#">3</PaginationLink>
+        </PaginationItem>
+        <PaginationItem>
+          <PaginationEllipsis />
+        </PaginationItem>
+        <PaginationItem>
+          <PaginationNext href="#" />
+        </PaginationItem>
+      </PaginationContent>
+    </Pagination>
+  )
+}
+
+
+NEXT 
+  <PaginationItem>
+-   <a>
++   <Link>
+      // ...
+-   </a>
++   </Link>
+  </PaginationItem>
+*/

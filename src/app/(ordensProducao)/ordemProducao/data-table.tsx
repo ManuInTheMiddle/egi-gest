@@ -1,6 +1,6 @@
 "use client";
 import React, { useState } from "react";
-import { ScrollText } from "lucide-react";
+import { RefreshCcw } from "lucide-react";
 import {
   ColumnFiltersState,
   getFilteredRowModel,
@@ -9,8 +9,6 @@ import {
   getCoreRowModel,
   useReactTable,
   getPaginationRowModel,
-  SortingState,
-  getSortedRowModel,
 } from "@tanstack/react-table";
 
 import {
@@ -24,7 +22,6 @@ import {
 
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import Link from "next/link";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -36,7 +33,6 @@ export default function DataTable<TData, TValue>({
   data,
 }: DataTableProps<TData, TValue>) {
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
-  const [sorting, setSorting] = useState<SortingState>([]);
 
   const table = useReactTable({
     data,
@@ -45,11 +41,8 @@ export default function DataTable<TData, TValue>({
     onColumnFiltersChange: setColumnFilters,
     getFilteredRowModel: getFilteredRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
-    onSortingChange: setSorting,
-    getSortedRowModel: getSortedRowModel(),
     state: {
       columnFilters,
-      sorting,
     },
   });
 
@@ -80,11 +73,9 @@ export default function DataTable<TData, TValue>({
           />
         </div>
         <div className="flex mr-3">
-          <Link href="producao/historico">
-            <Button>
-              <ScrollText />
-            </Button>
-          </Link>
+          <Button>
+            <RefreshCcw />
+          </Button>
         </div>
       </div>
       <div className="rounded-md border-2 border-lime-500">

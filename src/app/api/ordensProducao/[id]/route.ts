@@ -4,9 +4,19 @@ import prisma from "../../../../../prisma/db";
 export const GET = async (req: NextRequest) => {
   try {
     const id = req.nextUrl.pathname.split("ordensProducao/")[1];
+
     const ordemProducao = await prisma.ordens_producao.findUnique({
       where: {
         id_ordem_producao: parseInt(id!),
+      },
+      select: {
+        id_ordem_producao: true,
+        status_ordens_producao: { select: { name: true } },
+        lote_fabrico: true,
+        quantidade: true,
+        data_criacao: true,
+        produtos: true,
+        detalhes_ordens_producao: true,
       },
     });
 

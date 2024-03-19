@@ -86,6 +86,7 @@ model materias_primas {
   artigo                         String                           @unique(map: "unique_materias_primas_artigo") @db.VarChar(45)
   descricao                      String                           @db.VarChar(45)
   codigo_qr                      String?                          @db.VarChar(50)
+  bom                            bom[]
   detalhes_entrada_materia_prima detalhes_entrada_materia_prima[]
   detalhes_materia_prima         detalhes_materia_prima[]
   detalhes_ordens_compra         detalhes_ordens_compra[]
@@ -122,6 +123,7 @@ model produtos {
   artigo             String               @unique(map: "produtos_pk_2") @db.VarChar(45)
   descricao          String               @db.VarChar(75)
   densidade          Decimal?             @db.Decimal(3, 2)
+  bom                bom[]
   ordens_producao    ordens_producao?
   produto_intermedio produto_intermedio[]
 }
@@ -146,10 +148,11 @@ model status_ordens_compra {
 }
 
 model status_ordens_producao {
-  id_status_ordem_producao    Int                           @id(map: "status_ordens_producao_pk") @default(autoincrement())
-  name                        String                        @db.VarChar(45)
-  ordens_producao             ordens_producao[]
-  transaction_ordens_producao transaction_ordens_producao[]
+  id_status_ordem_producao                                                                        Int                           @id(map: "status_ordens_producao_pk") @default(autoincrement())
+  name                                                                                            String                        @db.VarChar(45)
+  ordens_producao                                                                                 ordens_producao[]
+  transaction_ordens_producao_transaction_ordens_producao_status_novoTostatus_ordens_producao     transaction_ordens_producao[] @relation("transaction_ordens_producao_status_novoTostatus_ordens_producao")
+  transaction_ordens_producao_transaction_ordens_producao_status_anteriorTostatus_ordens_producao transaction_ordens_producao[] @relation("transaction_ordens_producao_status_anteriorTostatus_ordens_producao")
 }
 
 model transaction_entrada_materia_prima {
@@ -162,12 +165,14 @@ model transaction_entrada_materia_prima {
 }
 
 model transaction_ordens_producao {
-  id_transaction_ordem_producao Int                    @id(map: "transaction_ordens_producao_pk") @default(autoincrement())
-  timestamp                     DateTime               @default(now()) @db.Timestamp(6)
-  ordem_producao                Int
-  status                        Int
-  ordens_producao               ordens_producao        @relation(fields: [ordem_producao], references: [id_ordem_producao], onDelete: NoAction, onUpdate: NoAction, map: "transaction_ordens_producao_ordens_producao_id_ordem_producao_f")
-  status_ordens_producao        status_ordens_producao @relation(fields: [status], references: [id_status_ordem_producao], onDelete: NoAction, onUpdate: NoAction, map: "transaction_ordens_producao_status_ordens_producao_id_status_or")
+  id_transaction_ordem_producao                                                              Int                    @id(map: "transaction_ordens_producao_pk") @default(autoincrement())
+  timestamp                                                                                  DateTime               @default(now()) @db.Timestamp(6)
+  ordem_producao                                                                             Int
+  status_anterior                                                                            Int
+  status_novo                                                                                Int
+  status_ordens_producao_transaction_ordens_producao_status_novoTostatus_ordens_producao     status_ordens_producao @relation("transaction_ordens_producao_status_novoTostatus_ordens_producao", fields: [status_novo], references: [id_status_ordem_producao], onDelete: NoAction, onUpdate: NoAction, map: "transaction_ord_prod_status_ord_prod_id_status_ord_prod_fk")
+  ordens_producao                                                                            ordens_producao        @relation(fields: [ordem_producao], references: [id_ordem_producao], onDelete: NoAction, onUpdate: NoAction, map: "transaction_ordens_producao_ordens_producao_id_ordem_producao_f")
+  status_ordens_producao_transaction_ordens_producao_status_anteriorTostatus_ordens_producao status_ordens_producao @relation("transaction_ordens_producao_status_anteriorTostatus_ordens_producao", fields: [status_anterior], references: [id_status_ordem_producao], onDelete: NoAction, onUpdate: NoAction, map: "transaction_ordens_producao_status_ordens_producao_id_status_or")
 }
 
 model users {
@@ -268,4 +273,14 @@ model tampas {
   id_tampa          Int                 @id(map: "tampas_pk") @default(autoincrement())
   tipo_tampa        String              @db.VarChar(15)
   ordens_enchimento ordens_enchimento[]
+}
+
+model bom {
+  id_bom          Int             @id(map: "bom_pk") @default(autoincrement())
+  produto         Int
+  materia_prima   Int
+  percentagem     Decimal         @db.Decimal(8, 6)
+  lote            String?         @db.VarChar(20)
+  materias_primas materias_primas @relation(fields: [materia_prima], references: [id_materia_prima], onDelete: NoAction, onUpdate: NoAction, map: "bom_materias_primas_id_materia_prima_fk")
+  produtos        produtos        @relation(fields: [produto], references: [id_produto], onDelete: NoAction, onUpdate: NoAction, map: "bom_produtos_id_produto_fk")
 }

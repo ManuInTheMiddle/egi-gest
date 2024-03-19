@@ -1,4 +1,4 @@
-export type ordemProducao = {
+export type ordemProducaoPlanear = {
   id: number;
   //numero de artigo do produto
   referencia: string;
@@ -8,10 +8,11 @@ export type ordemProducao = {
   descricao: string;
   //quantidade a produzir
   quantidade: number;
-  status: "Planeada" | "A Decorrer" | "Finalizada" | "Cancelada";
+  status: "Planeada" | "Por Planear";
+  reator?: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | undefined;
 };
 
-export const ordensProducao: ordemProducao[] = [
+export const ordensProdPlan: ordemProducaoPlanear[] = [
   {
     id: 1,
     referencia: "200A",
@@ -19,6 +20,7 @@ export const ordensProducao: ordemProducao[] = [
     descricao: "Sabonete Liquido Azul",
     quantidade: 1000,
     status: "Planeada",
+    reator: undefined,
   },
   {
     id: 2,
@@ -26,7 +28,8 @@ export const ordensProducao: ordemProducao[] = [
     loteFabrico: "214d30",
     descricao: "Lava Louça Manual",
     quantidade: 5000,
-    status: "A Decorrer",
+    status: "Por Planear",
+    reator: undefined,
   },
   {
     id: 3,
@@ -34,7 +37,8 @@ export const ordensProducao: ordemProducao[] = [
     loteFabrico: "21550",
     descricao: "Lava Louça Maquina",
     quantidade: 9000,
-    status: "A Decorrer",
+    status: "Por Planear",
+    reator: undefined,
   },
   {
     id: 4,
@@ -42,7 +46,8 @@ export const ordensProducao: ordemProducao[] = [
     loteFabrico: "40050",
     descricao: "Cera Incolor",
     quantidade: 9950,
-    status: "Finalizada",
+    status: "Por Planear",
+    reator: undefined,
   },
   {
     id: 5,
@@ -50,7 +55,8 @@ export const ordensProducao: ordemProducao[] = [
     loteFabrico: "81310",
     descricao: "DT HIDRO-FB",
     quantidade: 6000,
-    status: "Cancelada",
+    status: "Por Planear",
+    reator: undefined,
   },
   {
     id: 6,
@@ -58,7 +64,8 @@ export const ordensProducao: ordemProducao[] = [
     loteFabrico: "234E30",
     descricao: "Desengordurante Verde",
     quantidade: 6000,
-    status: "A Decorrer",
+    status: "Por Planear",
+    reator: undefined,
   },
   {
     id: 7,
@@ -67,5 +74,6 @@ export const ordensProducao: ordemProducao[] = [
     descricao: "RIMS T (Alcalino)- Detergente de lavagem",
     quantidade: 7500,
     status: "Planeada",
+    reator: undefined,
   },
 ];

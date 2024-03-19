@@ -16,8 +16,8 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className="no-scrollbar">
-      <body>
-        <section className={inter.className}>{children}</section>
+      <body className={inter.className}>
+        <section>{children}</section>
       </body>
     </html>
   );

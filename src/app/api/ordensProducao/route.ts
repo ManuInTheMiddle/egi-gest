@@ -5,7 +5,7 @@ export const GET = async (req: NextRequest) => {
     const ordensProducao = await prisma.ordens_producao.findMany({
       select: {
         id_ordem_producao: true,
-        status_ordens_producao: { select: { name: true } },
+        status_ordens_producao: true,
         lote_fabrico: true,
         quantidade: true,
         data_criacao: true,
