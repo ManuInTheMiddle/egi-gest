@@ -14,12 +14,11 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
-import { Save, Redo, ArrowRightToLine } from "lucide-react";
+import { Save, Redo } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 import { OrdemProducao } from "@/types";
 import { useAppDispatch } from "@/redux/hooks";
 import { changeState } from "@/redux/ordemProducao/ordemProducaoSlice";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
 interface propsBotao {
@@ -111,7 +110,9 @@ const BotaoConfirmacao = ({ ordem, estadoOrdem }: propsBotao) => {
           <Redo strokeWidth={1.5} />
           <Label className="text-green-700">
             {estadoNovoString
-              ? estadoNovoString?.estado
+              ? estadoNovoString?.estado === ordem.status_ordens_producao.name
+                ? "!!NÃO HOUVE ALTERAÇÃO!!"
+                : estadoNovoString.estado
               : "!!NÃO HOUVE ALTERAÇÃO!!"}
           </Label>
         </div>
