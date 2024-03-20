@@ -1,15 +1,26 @@
 "use client";
 import ProgressBar from "react-customizable-progressbar";
-import { useAppSelector } from "@/redux/hooks";
+import { FetchOrdens } from "@/Services/OrdensProducao/fetchOrdens";
 
 function ProgressoFabrico() {
-  const ordensComEstadoConcluido = useAppSelector(
-    (state) => state.ordemProducao.orders
+  const { data } = FetchOrdens();
+  //console.log(data?.ordensProducao.length);
+  const ordensConcluidas = data?.ordensProducao.filter(
+    (ordem) => ordem.status_ordens_producao.name === "Finalizada"
   );
+  const ordensPlanedas = data?.ordensProducao.filter(
+    (ordem) =>
+      ordem.status_ordens_producao.name === "Planeada" ||
+      ordem.status_ordens_producao.name === "A Decorrer"
+  );
+  const ordensCanceladas = data?.ordensProducao.filter(
+    (ordem) => ordem.status_ordens_producao.name === "Cancelada"
+  );
+  //console.log(ordensPlanedas?.length);
   return (
     <div>
       <ProgressBar
-        progress={89}
+        progress={(100 * ordensConcluidas?.length!) / ordensPlanedas?.length!}
         radius={100}
         strokeWidth={5}
         cut={120}
@@ -20,18 +31,26 @@ function ProgressoFabrico() {
       >
         <div className="your-indicator">
           <div className="text-4xl text-slate-600 font-sans font-bold normal-nums">
-            {89}%
+            {data
+              ? `${
+                  (100 * ordensConcluidas?.length!) / ordensPlanedas?.length!
+                }%`
+              : "A carregar"}
           </div>
         </div>
       </ProgressBar>
       <div className="-mt-3">
         <div className="flex flex-row">
           <p className="font-medium">Ordens Planeadas:</p>&nbsp;
-          {0} ordens
+          {ordensPlanedas?.length} ordens
         </div>
         <div className="flex flex-row">
           <p className="font-medium">Ordens Concluidas:</p>&nbsp;
-          {0} ordens
+          {ordensConcluidas?.length} ordens
+        </div>
+        <div className="flex flex-row">
+          <p className="font-medium">Canceladas:</p>&nbsp;
+          {ordensCanceladas?.length} ordens
         </div>
       </div>
     </div>
