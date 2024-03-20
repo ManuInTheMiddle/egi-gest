@@ -1,5 +1,4 @@
 import { createSlice } from "@reduxjs/toolkit";
-import { ordemProducaoActionTypes } from "./Action-Type";
 
 const initialState: any = {
   orders: [],
