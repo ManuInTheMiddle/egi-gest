@@ -1,15 +1,15 @@
 "use client";
 import ProgressBar from "react-customizable-progressbar";
+import { useAppSelector } from "@/redux/hooks";
 
-interface progressBarProps {
-  Ipercentage: number;
-}
-
-function ProgressoFabrico({ Ipercentage }: progressBarProps) {
+function ProgressoFabrico() {
+  const ordensComEstadoConcluido = useAppSelector(
+    (state) => state.ordemProducao.orders
+  );
   return (
     <div>
       <ProgressBar
-        progress={Ipercentage}
+        progress={89}
         radius={100}
         strokeWidth={5}
         cut={120}
@@ -20,13 +20,13 @@ function ProgressoFabrico({ Ipercentage }: progressBarProps) {
       >
         <div className="your-indicator">
           <div className="text-4xl text-slate-600 font-sans font-bold normal-nums">
-            {Ipercentage}%
+            {89}%
           </div>
         </div>
       </ProgressBar>
       <div className="-mt-3">
         <div className="flex flex-row">
-          <p className="font-medium">Ordens Agendadas:</p>&nbsp;
+          <p className="font-medium">Ordens Planeadas:</p>&nbsp;
           {0} ordens
         </div>
         <div className="flex flex-row">

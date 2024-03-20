@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "../globals.css";
+import StoreProvider from "../StoreProvider";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -17,7 +18,9 @@ export default function RootLayout({
   return (
     <html lang="en" className="no-scrollbar">
       <body className={inter.className}>
-        <section>{children}</section>
+        <section>
+          <StoreProvider>{children}</StoreProvider>
+        </section>
       </body>
     </html>
   );

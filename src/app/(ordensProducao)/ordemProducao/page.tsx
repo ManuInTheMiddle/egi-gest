@@ -28,7 +28,7 @@ const page = () => {
                 <CardDescription>Ordens Concluidas / Agendadas</CardDescription>
               </CardHeader>
               <CardContent className="mx-auto">
-                <ProgressoFabrico Ipercentage={89} />
+                <ProgressoFabrico />
               </CardContent>
             </Card>
             <Card className="border-2 border-lime-500 flex flex-col shadow-md">
