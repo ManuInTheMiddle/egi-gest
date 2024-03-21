@@ -8,15 +8,24 @@ interface Ireator {
 export const GET = async (req: NextRequest) => {
   try {
     const orderId = req.nextUrl.searchParams.get("order-id");
-    const reator = await prisma.ordens_producao.findMany({
-      where: { id_ordem_producao: parseInt(orderId!) },
-      select: {
-        id_ordem_producao: true,
-        reatores: true,
-        lote_fabrico: true,
-        reator: true,
-      },
-    });
+    const reator = orderId
+      ? await prisma.ordens_producao.findMany({
+          where: { id_ordem_producao: parseInt(orderId!) },
+          select: {
+            id_ordem_producao: true,
+            reatores: true,
+            lote_fabrico: true,
+            reator: true,
+          },
+        })
+      : await prisma.ordens_producao.findMany({
+          select: {
+            id_ordem_producao: true,
+            reatores: true,
+            lote_fabrico: true,
+            reator: true,
+          },
+        });
 
     if (reator.length === 0) {
       return NextResponse.json(
