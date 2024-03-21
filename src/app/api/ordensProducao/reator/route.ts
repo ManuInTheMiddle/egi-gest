@@ -16,6 +16,9 @@ export const GET = async (req: NextRequest) => {
             reatores: true,
             lote_fabrico: true,
             reator: true,
+            quantidade: true,
+            status_ordens_producao: true,
+            produtos: true,
           },
         })
       : await prisma.ordens_producao.findMany({
@@ -24,6 +27,9 @@ export const GET = async (req: NextRequest) => {
             reatores: true,
             lote_fabrico: true,
             reator: true,
+            quantidade: true,
+            status_ordens_producao: true,
+            produtos: true,
           },
         });
 
