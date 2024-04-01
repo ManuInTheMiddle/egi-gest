@@ -48,15 +48,15 @@ model detalhes_ordens_compra {
 model detalhes_ordens_producao {
   id_detalhes_ordem_producao Int             @id(map: "detalhes_ordens_producao_pk") @default(autoincrement())
   ordem_producao             Int
-  user                       Int
-  data_hora_inicio           DateTime        @db.Timestamp(6)
-  data_hora_fim              DateTime        @db.Timestamp(6)
-  min_ph_desejado            Int
+  user                       Int?
+  data_hora_inicio           DateTime?       @db.Timestamp(6)
+  data_hora_fim              DateTime?       @db.Timestamp(6)
+  min_ph_desejado            Int?
   max_ph_desejado            Int?
-  data_hora_aprovacao        DateTime        @db.Timestamp(6)
-  data_hora_despejo          DateTime        @db.Timestamp(6)
+  data_hora_aprovacao        DateTime?       @db.Timestamp(6)
+  data_hora_despejo          DateTime?       @db.Timestamp(6)
   ordens_producao            ordens_producao @relation(fields: [ordem_producao], references: [id_ordem_producao], onDelete: NoAction, onUpdate: NoAction, map: "detalhes_ordens_producao_ordens_producao_id_ordem_producao_fk")
-  users                      users           @relation(fields: [user], references: [id_user], onDelete: NoAction, onUpdate: NoAction, map: "detalhes_ordens_producao_users_id_user_fk")
+  users                      users?          @relation(fields: [user], references: [id_user], onDelete: NoAction, onUpdate: NoAction, map: "detalhes_ordens_producao_users_id_user_fk")
 }
 
 model entrada_materia_prima {
@@ -109,10 +109,12 @@ model ordens_producao {
   produto                     Int                           @unique(map: "ordens_producao_pk_3")
   quantidade                  Int
   data_criacao                DateTime                      @default(now()) @db.Timestamptz(6)
+  reator                      Int?
   controlo_qualidade          controlo_qualidade[]
   detalhes_ordens_producao    detalhes_ordens_producao[]
   ordens_enchimento           ordens_enchimento[]
   produtos                    produtos                      @relation(fields: [produto], references: [id_produto], onDelete: NoAction, onUpdate: NoAction, map: "ordens_producao_produtos_id_produto_fk")
+  reatores                    reatores?                     @relation(fields: [reator], references: [id_reator], onDelete: NoAction, onUpdate: NoAction, map: "ordens_producao_reatores_id_reator_fk")
   status_ordens_producao      status_ordens_producao        @relation(fields: [status], references: [id_status_ordem_producao], onDelete: NoAction, onUpdate: NoAction, map: "ordens_producao_status_ordens_producao_id_status_ordem_producao")
   produto_intermedio          produto_intermedio[]
   transaction_ordens_producao transaction_ordens_producao[]
@@ -255,9 +257,10 @@ model produto_intermedio {
 }
 
 model reatores {
-  id_reator Int     @id(map: "reatores_pk") @default(autoincrement())
-  codigo_qr String? @db.VarChar(50)
-  descricao String  @db.VarChar(12)
+  id_reator       Int               @id(map: "reatores_pk") @default(autoincrement())
+  codigo_qr       String?           @db.VarChar(50)
+  descricao       String            @db.VarChar(12)
+  ordens_producao ordens_producao[]
 }
 
 /// The underlying table does not contain a valid unique identifier and can therefore currently not be handled by Prisma Client.

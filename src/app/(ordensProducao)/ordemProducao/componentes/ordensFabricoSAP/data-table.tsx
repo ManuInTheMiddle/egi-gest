@@ -1,7 +1,6 @@
 "use client";
 import React, { useState } from "react";
-import { RefreshCcw } from "lucide-react";
-import { CirclesWithBar } from "react-loader-spinner";
+
 import {
   ColumnFiltersState,
   getFilteredRowModel,
@@ -20,16 +19,14 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-
 import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
 }
 
-export default function DataTable<TData, TValue>({
+export default function DataTableSap<TData, TValue>({
   columns,
   data,
 }: DataTableProps<TData, TValue>) {
@@ -49,35 +46,26 @@ export default function DataTable<TData, TValue>({
 
   return (
     <div>
-      <div className="flex flex-row items-center justify-between gap-4">
-        <div className="flex items-center py-4 gap-x-2">
-          <Input
-            placeholder="Filtrar Status ... "
-            value={
-              (table.getColumn("status")?.getFilterValue() as string) ?? ""
-            }
-            onChange={(e) =>
-              table.getColumn("status")?.setFilterValue(e.target.value)
-            }
-            className="max-w-sm"
-          />
-          <Input
-            placeholder="Filtrar Lote ... "
-            value={
-              (table.getColumn("lote_fabrico")?.getFilterValue() as string) ??
-              ""
-            }
-            onChange={(e) =>
-              table.getColumn("lote_fabrico")?.setFilterValue(e.target.value)
-            }
-            className="max-w-sm"
-          />
-        </div>
-        <div className="flex mr-3">
-          <Button>
-            <RefreshCcw />
-          </Button>
-        </div>
+      <div className="flex items-center py-4 gap-x-2">
+        <Input
+          placeholder="Filtrar Nº Ordem ... "
+          value={(table.getColumn("nrOrdem")?.getFilterValue() as number) ?? ""}
+          onChange={(e) => {
+            table.getColumn("nrOrdem")?.setFilterValue(e.target.value);
+          }}
+          className="max-w-sm"
+        />
+        <Input
+          placeholder="Filtrar Referência ... "
+          value={
+            (table.getColumn("referenciaOrdem")?.getFilterValue() as string) ??
+            ""
+          }
+          onChange={(e) =>
+            table.getColumn("referenciaOrdem")?.setFilterValue(e.target.value)
+          }
+          className="max-w-sm"
+        />
       </div>
       <div className="rounded-md border-2 border-lime-500">
         <Table>

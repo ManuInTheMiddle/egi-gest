@@ -1,18 +1,22 @@
 import { ColumnDef } from "@tanstack/react-table";
 
-import { ordemProducaoPlanear } from "../../../../public/assets/mockData/ordensFabrico";
+import { Reator } from "@/Services/OrdensProducao/fetchReatores";
 
-const ColumnsComponent: ColumnDef<ordemProducaoPlanear>[] = [
-  { accessorKey: "referencia", header: "Referência" },
-  { accessorKey: "loteFabrico", header: "Lote Fabrico" },
-  { accessorKey: "descricao", header: "Descrição" },
+const ColumnsComponent: ColumnDef<Reator>[] = [
+  { accessorKey: "produtos.artigo", header: "Referência" },
+  { accessorKey: "lote_fabrico", header: "Lote Fabrico" },
+  { accessorKey: "produtos.descricao", header: "Descrição" },
   { accessorKey: "quantidade", header: "Quantidade" },
-  { accessorKey: "reator", header: "Reator" },
+  { accessorKey: "reatores.descricao", header: "Reator" },
   {
-    accessorKey: "status",
+    accessorKey: "status_ordens_producao.name",
     header: "Status",
     id: "status",
   },
 ];
 
 export default ColumnsComponent;
+
+/*
+
+*/

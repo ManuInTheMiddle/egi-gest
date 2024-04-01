@@ -6,6 +6,7 @@ import { login } from "@/lib/auth";
 
 export const options: NextAuthOptions = {
   providers: [
+    /*
     GitHubProvider({
       profile(profile: GithubProfile) {
         console.log(profile);
@@ -19,6 +20,7 @@ export const options: NextAuthOptions = {
       clientId: process.env.AUTH_GITHUB_CLIENT_ID as string,
       clientSecret: process.env.AUTH_GITHUB_CLIENT_SECRET as string,
     }),
+    */
     CredentialsProvider({
       name: "Credentials",
       credentials: {
