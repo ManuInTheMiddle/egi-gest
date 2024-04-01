@@ -94,9 +94,7 @@ const FormularioInformacao = (ordem: OrdemProducao) => {
           </div>
           <div className="flex flex-col justify-items gap-4 m-2">
             <div className="flex flex-col items-center gap-4">
-              <Label htmlFor="username" className="text-right">
-                Estado
-              </Label>
+              <Label className="text-right">Estado</Label>
               <Select
                 defaultValue={ordem.status_ordens_producao.name}
                 onValueChange={(e) => {
