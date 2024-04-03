@@ -13,7 +13,7 @@ import {
 import { ListaBom, OrdemProducao } from "@/types";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
-
+import { useAppSelector } from "@/redux/hooks";
 import {
   Select,
   SelectContent,
@@ -26,9 +26,47 @@ import { estadosOrdem } from "../componentes/estados";
 import { useEffect, useState } from "react";
 
 import BotaoConfirmacao from "../componentes/BotaoConfirmacao";
+import { FetchReator } from "@/Services/OrdensProducao/fetchReatores";
 
 const FormularioInformacao = (ordem: OrdemProducao) => {
+  const orders = useAppSelector((state) => state.ordemProducao.orders);
+
   const [estadoOrdem, setEstadoOrdem] = useState("");
+  const [reator, setReator] = useState("");
+  const nrReatores = [
+    {
+      id: 1,
+      nome: "Reator 1",
+    },
+    {
+      id: 2,
+      nome: "Reator 2",
+    },
+    {
+      id: 3,
+      nome: "Reator 3",
+    },
+    {
+      id: 4,
+      nome: "Reator 4",
+    },
+    {
+      id: 5,
+      nome: "Reator 5",
+    },
+    {
+      id: 6,
+      nome: "Reator 6",
+    },
+    {
+      id: 7,
+      nome: "Reator 7",
+    },
+    {
+      id: 8,
+      nome: "Reator 8",
+    },
+  ];
 
   const [data, setData] = useState<ListaBom[]>();
 
@@ -140,12 +178,41 @@ const FormularioInformacao = (ordem: OrdemProducao) => {
               <Label htmlFor="username" className="text-right">
                 Reator
               </Label>
-              <Input
-                id="username"
-                value="Reator A"
-                disabled
-                className="text-center"
-              />
+              <Select
+                defaultValue={
+                  orders.filter(
+                    (order: any) =>
+                      order.id_ordem_producao === ordem.id_ordem_producao
+                  )[0].reatores
+                    ? orders.filter(
+                        (order: any) =>
+                          order.id_ordem_producao === ordem.id_ordem_producao
+                      )[0].reatores.descricao
+                    : ""
+                }
+                onValueChange={(e) => {
+                  const idReator = nrReatores.filter(
+                    (reator) => reator.nome === e
+                  )[0].id;
+                  //console.log(idReator);
+                  console.log(orders);
+                  setReator(idReator.toString());
+                  return idReator.toString();
+                }}
+              >
+                <SelectTrigger className="w-[180px]">
+                  <SelectValue placeholder="Escolha um reator ..." />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectGroup>
+                    {nrReatores.map((reator) => (
+                      <SelectItem id={reator.id.toString()} value={reator.nome}>
+                        {reator.nome}
+                      </SelectItem>
+                    ))}
+                  </SelectGroup>
+                </SelectContent>
+              </Select>
             </div>
             <div className="flex flex-col items-center gap-4">
               <Label htmlFor="username" className="text-right">
@@ -161,7 +228,11 @@ const FormularioInformacao = (ordem: OrdemProducao) => {
           </div>
         </div>
         <div className="pt-10 ml-3">
-          <BotaoConfirmacao estadoOrdem={estadoOrdem} ordem={ordem} />
+          <BotaoConfirmacao
+            estadoOrdem={estadoOrdem}
+            ordem={ordem}
+            reator={reator}
+          />
         </div>
       </div>
       <div className="flex flex-col justify-items-center gap-4 mx-4 ">
