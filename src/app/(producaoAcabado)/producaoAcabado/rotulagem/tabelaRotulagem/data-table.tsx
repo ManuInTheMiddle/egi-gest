@@ -389,7 +389,7 @@ export function DataTable<TData  extends ProductionOrder, TValue>({
                                   Quantity: quantidadeProduzida,
                                   BatchNumbers: [
                                     {
-                                      BatchNumber: "colocarVariaveldoPick",
+                                      BatchNumber: pickagemBatchNumber,
                                       Quantity: quantidadeProduzida,
                                       ItemCode: ordemProducao.ItemNo,
                                     },
