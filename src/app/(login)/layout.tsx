@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "../globals.css";
-import Providers from "@/components/ui/providers";
+import TanstackProvider from "../../../providers/TanstackProvider";
+
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -18,7 +19,9 @@ export default function RootLayout({
   return (
     <html lang="en" className="no-scrollbar">
       <body>
-        <section className={inter.className}>{children}</section>
+        <section className={inter.className}>
+        <TanstackProvider>{children}</TanstackProvider>
+          </section>
       </body>
     </html>
   );

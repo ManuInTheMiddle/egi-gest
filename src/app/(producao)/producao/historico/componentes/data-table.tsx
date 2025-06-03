@@ -1,6 +1,6 @@
 "use client";
 import React, { useState } from "react";
-
+import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { format, subDays } from "date-fns";
 import { pt } from "date-fns/locale";
@@ -34,7 +34,6 @@ import {
 } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
 import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
 import {
   Tooltip,
   TooltipContent,
@@ -75,24 +74,12 @@ export default function DataTable<TData, TValue>({
         <div className="flex flex-row items-center py-4 gap-x-2 ">
           <div className="flex flex-row gap-x-2">
             <Input
-              placeholder="Filtrar Status ... "
+              placeholder="Filtrar Ordem ... "
               value={
-                (table.getColumn("estadoNovo")?.getFilterValue() as string) ??
-                ""
+                (table.getColumn("numOP")?.getFilterValue() as string) ?? ""
               }
               onChange={(e) =>
-                table.getColumn("estadoNovo")?.setFilterValue(e.target.value)
-              }
-              className="max-w-sm"
-            />
-            <Input
-              placeholder="Filtrar Lote ... "
-              value={
-                (table.getColumn("loteFabrico")?.getFilterValue() as string) ??
-                ""
-              }
-              onChange={(e) =>
-                table.getColumn("loteFabrico")?.setFilterValue(e.target.value)
+                table.getColumn("numOP")?.setFilterValue(e.target.value)
               }
               className="max-w-sm"
             />
@@ -113,11 +100,11 @@ export default function DataTable<TData, TValue>({
                 {date?.from ? (
                   date.to ? (
                     <>
-                      {format(date.from, "LLL dd, y")} -{" "}
-                      {format(date.to, "LLL dd, y")}
+                      {format(date.from, "LLL dd, y", { locale: pt })} -{" "}
+                      {format(date.to, "LLL dd, y", { locale: pt })}
                     </>
                   ) : (
-                    format(date.from, "LLL dd, y")
+                    format(date.from, "LLL dd, y", { locale: pt })
                   )
                 ) : (
                   <span>Filtrar por Data</span>

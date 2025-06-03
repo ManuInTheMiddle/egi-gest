@@ -6,50 +6,65 @@ export default withAuth(
     console.log(request.nextUrl.pathname);
     console.log(request.nextauth.token);
 
-    //caso o url seja "/ordemFabrico" e o utilizador NAO seja admin não tera permissoes para prosseguir
-    /*
-    if (
-      request.nextUrl.pathname.match("/") &&
-      request.nextauth.token?.role !== "admin"
-    ) {
-      return NextResponse.rewrite(new URL("/denied", request.url));
-    }
-    */
-    if (
-      request.nextUrl.pathname.startsWith("/dashboard") &&
-      request.nextauth.token?.role !== "admin" &&
-      request.nextauth.token?.role !== "dashboard"
-    ) {
-      return NextResponse.rewrite(new URL("/denied", request.url));
-    }
-
+    
+   
     if (
       request.nextUrl.pathname.startsWith("/chegadaMateriaPrima") &&
-      request.nextauth.token?.role !== "admin"
+      request.nextauth.token?.role !== "admin" &&
+      request.nextauth.token?.role !== "gestor" &&
+      request.nextauth.token?.role !== "rececaomp"
     ) {
+      console.log(request.nextauth.token?.role)
       return NextResponse.rewrite(new URL("/denied", request.url));
     }
 
     if (
-      request.nextUrl.pathname.startsWith("/ordemFabrico") &&
+      request.nextUrl.pathname.startsWith("/receitas") &&
       request.nextauth.token?.role !== "admin" &&
-      request.nextauth.token?.role !== "ordensfabrico"
+      request.nextauth.token?.role !== "gestor" &&
+      request.nextauth.token?.role !== "receitas"
     ) {
+      console.log(request.nextauth.token?.role)
       return NextResponse.rewrite(new URL("/denied", request.url));
     }
 
     if (
       request.nextUrl.pathname.startsWith("/producao") &&
       request.nextauth.token?.role !== "admin" &&
+      request.nextauth.token?.role !== "gestor" &&
+      request.nextauth.token?.role !== "formulacao"
+    ) {
+      console.log(request.nextauth.token?.role)
+      return NextResponse.rewrite(new URL("/denied", request.url));
+    }
+
+    if (
+      request.nextUrl.pathname.startsWith("/produtoAcabado") &&
+      request.nextauth.token?.role !== "admin" &&
+      request.nextauth.token?.role !== "gestor" &&
       request.nextauth.token?.role !== "producao"
     ) {
+      console.log(request.nextauth.token?.role)
+      return NextResponse.rewrite(new URL("/denied", request.url));
+    }
+
+    if (
+      request.nextUrl.pathname.startsWith("/expedicao") &&
+      request.nextauth.token?.role !== "admin" &&
+      request.nextauth.token?.role !== "gestor" &&
+      request.nextauth.token?.role !== "expedicao"
+    ) {
+      console.log(request.nextauth.token?.role)
       return NextResponse.rewrite(new URL("/denied", request.url));
     }
 
     if (
       request.nextUrl.pathname.startsWith("/opcoes") &&
-      request.nextauth.token?.role !== "admin"
+      request.nextauth.token?.role !== "admin" &&
+      request.nextauth.token?.role !== "gestor"
+  
     ) {
+      console.log(request.nextauth.token?.role)
       return NextResponse.rewrite(new URL("/denied", request.url));
     }
   },
@@ -63,10 +78,14 @@ export default withAuth(
 export const config = {
   matcher: [
     "/",
-    "/dashboard",
     "/chegadaMateriaPrima",
+    "/receitas",
     "/ordemFabrico",
     "/producao",
+    "/producaoAcabado",
+    "/expedicao",
+    "/maisPrafrente",
     "/opcoes",
+    "/denied"
   ],
 };

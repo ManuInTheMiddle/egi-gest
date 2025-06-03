@@ -12,8 +12,8 @@ const Retorceder = () => {
       <Button size={"icon"} variant={"ghost"}>
         <ArrowLeftCircle
           onClick={() => {
-            console.log("Voltar");
-            router.back();
+            //console.log("Voltar");
+            router.push("/producao");
           }}
         />
       </Button>

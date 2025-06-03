@@ -1,26 +1,8 @@
 import type { NextAuthOptions } from "next-auth";
-import GitHubProvider from "next-auth/providers/github";
 import CredentialsProvider from "next-auth/providers/credentials";
-import { GithubProfile } from "next-auth/providers/github";
-import { login } from "@/lib/auth";
 
 export const options: NextAuthOptions = {
   providers: [
-    /*
-    GitHubProvider({
-      profile(profile: GithubProfile) {
-        console.log(profile);
-        return {
-          ...profile,
-          role: profile.role ?? "user",
-          id: profile.id.toString(),
-          image: profile.avatar_url,
-        };
-      },
-      clientId: process.env.AUTH_GITHUB_CLIENT_ID as string,
-      clientSecret: process.env.AUTH_GITHUB_CLIENT_SECRET as string,
-    }),
-    */
     CredentialsProvider({
       name: "Credentials",
       credentials: {
@@ -36,98 +18,90 @@ export const options: NextAuthOptions = {
         },
       },
       async authorize(credentials, req) {
-        //this is where u retrieve the user credentials from DB
-        /*
-        if(!credentials?.username || !credentials?.password){
-          return null
-        }
-
-        try{
-          const user = login(credentials?.username, credentials?.password);
-          return user;
-        }catch(err){
-          console.error(err);
-          return null;
-        }
-        
-        */
-
-        const userAdmin = {
+        const JPMAdmin = {
           id: "4528",
           role: "admin",
           username: "JPMadmin",
-          email: "jpm.admin@jpm.pt",
           password: "JPM_4528",
         };
-
-        const userUser = {
-          id: "103976",
-          role: "user",
-          username: "User",
-          email: "jpm.user@jpm.pt",
-          password: "User_4528",
-        };
-
-        const dashboard = {
+ 
+        const gestor = {
           id: "15123",
-          role: "dashboard",
-          username: "Dashboard",
-          email: "dashboard@jpm.pt",
-          password: "Dashboard_4528",
+          role: "gestor",
+          username: "Gestor",
+          password: "Gestor_4528",
         };
-
-        const chegadaMP = {
+        
+        const rececaoMP = {
           id: "10312",
-          role: "chegadaMP",
-          username: "ChegadaMP",
-          email: "chegadaMP@jpm.pt",
-          password: "ChegadaMP_4528",
+          role: "rececaomp",
+          username: "RececaoMP",
+          password: "RececaoMP_4528",
         };
-
-        const ordensFabrico = {
+        
+        const receitas = {
           id: "103979",
-          role: "ordensfabrico",
-          username: "OrdensFabrico",
-          email: "ordensfabrico@jpm.pt",
-          password: "OrdensFabrico_4528",
+          role: "receitas",
+          username: "Receitas",
+          password: "Receitas_4528",
         };
-
+        
+        const formulacao = {
+          id: "103976",
+          role: "formulacao",
+          username: "Formulacao",
+          password: "Formulacao_4528",
+        };
+        
         const producao = {
           id: "15325",
           role: "producao",
           username: "Producao",
-          email: "Producao@jpm.pt",
           password: "Producao_4528",
         };
 
+        const expedicao = {
+          id: "153221",
+          role: "expedicao",
+          username: "Expedicao",
+          password: "Expedicao_4528",
+        };
+
         if (
-          credentials?.username === dashboard.username &&
-          credentials?.password === dashboard.password
+          credentials?.username === JPMAdmin.username &&
+          credentials?.password === JPMAdmin.password
         ) {
-          return dashboard;
+          return JPMAdmin;
         }
 
         if (
-          credentials?.username === chegadaMP.username &&
-          credentials?.password === chegadaMP.password
+          credentials?.username === gestor.username &&
+          credentials?.password === gestor.password
         ) {
-          return chegadaMP;
+          return gestor;
         }
 
         if (
-          credentials?.username === userUser.username &&
-          credentials?.password === userUser.password
+          credentials?.username === rececaoMP.username &&
+          credentials?.password === rececaoMP.password
         ) {
-          return userUser;
+          return rececaoMP;
         }
 
         if (
-          credentials?.username === ordensFabrico.username &&
-          credentials?.password === ordensFabrico.password
+          credentials?.username === receitas.username &&
+          credentials?.password === receitas.password
         ) {
-          return ordensFabrico;
+          return receitas;
         }
 
+        if (
+          credentials?.username === formulacao.username &&
+          credentials?.password === formulacao.password
+        ) {
+          return formulacao;
+        }
+        
         if (
           credentials?.username === producao.username &&
           credentials?.password === producao.password
@@ -136,22 +110,38 @@ export const options: NextAuthOptions = {
         }
 
         if (
-          credentials?.username === userAdmin.username &&
-          credentials?.password === userAdmin.password
+          credentials?.username === expedicao.username &&
+          credentials?.password === expedicao.password
         ) {
-          return userAdmin;
-        } else {
+          return expedicao;
+        }else {
           return null;
         }
       },
     }),
   ],
   callbacks: {
-    jwt({ token, user }) {
+    async jwt({ token, user }) {
       if (user) {
+        token.id = user.id;
         token.role = user.role;
-        return token;
+        token.name = user.username;
       }
+      return token;
     },
+    async session({session,token}){
+      if(token){
+        session.user.id= token.id
+        session.user.role= token.role
+        session.user.name = token.name
+      }
+      return session
+    }
+
   },
+  secret: process.env.NEXTAUTH_SECRET,
+  session:{strategy:'jwt'},
+  pages:{
+    signIn:'/login'
+  }
 };

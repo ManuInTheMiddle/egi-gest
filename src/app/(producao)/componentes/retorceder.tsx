@@ -13,7 +13,7 @@ const Retorceder = () => {
         <ArrowLeftCircle
           onClick={() => {
             console.log("Voltar");
-            router.back();
+            router.push("/");
           }}
         />
       </Button>

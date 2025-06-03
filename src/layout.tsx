@@ -15,7 +15,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="no-scrollbar">
+    <html lang="en" className="no-scrollbar h-full min-h-full">
       <body>
         <section className={inter.className}>{children}</section>
       </body>

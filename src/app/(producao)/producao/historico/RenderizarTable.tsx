@@ -13,41 +13,44 @@ import {
   Tooltip,
 } from "@/components/ui/tooltip";
 
+const BASE_URL = process.env.NEXT_PUBLIC_HOST;
+
 const RenderizarTable = () => {
   const [data, setData] = useState([]);
   const primeiraRenderizacao = useRef(true);
   const [desativar, setdesativar] = useState(true);
   const [desativarSeguinte, setDesativarSeguinte] = useState(false);
-  const pagNum = useRef(0);
+  const pagNum = useRef(1);
 
   const handlePaginaSeguinte = async () => {
-    pagNum.current = pagNum.current + 10;
-    pagNum.current === 0 ? setdesativar(true) : setdesativar(false);
+    pagNum.current = pagNum.current + 1;
+    pagNum.current === 1 ? setdesativar(true) : setdesativar(false);
     //console.log(pagNum);
     try {
       const resposta = await axios.get(
-        `http://localhost:3000/api/ordensProducao/historico?skip=${pagNum.current}`
+        `http://DESKTOP-74D6VT2:8080/api/historicoOrdensProducao/pag/${pagNum.current}`
       );
-      const dados = await resposta.data.historicoOrdens;
+      const dados = await resposta.data;
       setData(dados);
-      if (!dados.length) {
+      console.log(dados);
+      if (!Array.isArray(dados)) {
+        setData([]);
         setDesativarSeguinte(true);
       }
-
       //console.log(dados);
     } catch (error) {
       console.error(error);
     }
   };
   const handlePaginaAnterior = async () => {
-    pagNum.current = pagNum.current - 10;
-    pagNum.current === 0 ? setdesativar(true) : setdesativar(false);
+    pagNum.current = pagNum.current - 1;
+    pagNum.current === 1 ? setdesativar(true) : setdesativar(false);
     //console.log(pagNum);
     try {
       const resposta = await axios.get(
-        `http://localhost:3000/api/ordensProducao/historico?skip=${pagNum.current}`
+        `http://DESKTOP-74D6VT2:8080/api/historicoOrdensProducao/pag/${pagNum.current}`
       );
-      const dados = await resposta.data.historicoOrdens;
+      const dados = await resposta.data;
       setData(dados);
       if (dados.length) {
         setDesativarSeguinte(false);
@@ -60,11 +63,11 @@ const RenderizarTable = () => {
 
   const getHistoricoOrdens = async () => {
     const resposta = await axios.get(
-      `http://localhost:3000/api/ordensProducao/historico?skip=0`
+      `http://DESKTOP-74D6VT2:8080/api/historicoOrdensProducao/pag/${pagNum.current}`
     );
-    const dados = await resposta.data.historicoOrdens;
+    const dados = await resposta.data;
     setData(dados);
-    //console.log(dados);
+    console.log(dados);
     primeiraRenderizacao.current = false;
     return dados;
   };
@@ -94,6 +97,7 @@ const RenderizarTable = () => {
               <p>Pagina Anterior</p>
             </TooltipContent>
           </Tooltip>
+          <div>{pagNum.current}</div>
           <Tooltip>
             <TooltipTrigger asChild>
               <Button

@@ -3,8 +3,7 @@ import { Inter } from "next/font/google";
 import "../globals.css";
 import Navbar from "@/components/ui/navbar";
 import Footer from "@/components/ui/footer";
-import Options from "@/components/ui/options";
-import Providers from "@/components/ui/providers";
+import TanstackProvider from "../../../providers/TanstackProvider";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -20,13 +19,18 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className="no-scrollbar">
-      <body>
-        <section className={inter.className}>
-          <Navbar />
-          <Options />
-          {children}
-          <Footer />
-        </section>
+      <body className="flex flex-col h-dvh min-h-full w-full">
+        <TanstackProvider>
+          <section className={inter.className}>
+            <Navbar />
+            <div className="absolute bottom-2/4 w-full">
+              {children}
+            </div>
+            <div className="absolute bottom-0 w-full">
+              <Footer />
+            </div>
+          </section>
+        </TanstackProvider>
       </body>
     </html>
   );
