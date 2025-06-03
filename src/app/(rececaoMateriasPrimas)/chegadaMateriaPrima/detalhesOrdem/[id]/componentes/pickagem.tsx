@@ -65,8 +65,6 @@ import { DialogTitle } from "@radix-ui/react-dialog";
 import { AlertDialogTitle } from "@radix-ui/react-alert-dialog";
 import { batch } from "react-redux";
 
-
-
 interface batchNumbersInterface {
   BatchNumber: string;
   Quantity: number;
@@ -171,7 +169,7 @@ const Pickagem = () => {
           const qrData = dataPARSEADA.payload.parsed;
 
           console.log("qr data", qrData);
-
+          /*
           const atualizarListaPickagens = produce(pickagens, (draft) => {
             draft.C1 = qrData.C1;
             draft.C2 = qrData.C2;
@@ -184,8 +182,17 @@ const Pickagem = () => {
             return draft;
           });
           console.log("atualizar lista picagens", atualizarListaPickagens);
+*/
+          setPickagens({
+            C1: qrData.C1,
+            C2: qrData.C2,
+            C3: qrData.C3,
+            C4: qrData.C4,
+            C5: qrData.C5,
+            C6: qrData.C6,
+            F: qrData.F,
+          });
 
-          setPickagens(atualizarListaPickagens);
         } else if (dataPARSEADA.type === "status") {
           console.log("Status update:", dataPARSEADA.payload);
         } else {
@@ -254,7 +261,7 @@ const Pickagem = () => {
         );
         setDataValidadeItensValidados(atualizarDataValidadeItensValidados);
         console.log(dataValidadeItensValidados);
-        console.log("itens validados",itensValidados);
+        console.log("itens validados", itensValidados);
         const atualizarPickState = produce(pickState, (draft) => {
           draft.success = true;
           draft.alert = false;
@@ -510,7 +517,7 @@ const Pickagem = () => {
                 <div className="flex flex-row space-x-2 items-center">
                   <Select
                     onValueChange={(e) => {
-                      console.log("lotes",e);
+                      console.log("lotes", e);
 
                       setArtigo(e);
                     }}
@@ -540,8 +547,11 @@ const Pickagem = () => {
 
                       quantidadeLote.refetch();
                       geridoPorLotesSAP.refetch();
-                      console.log("quantidades sap",quantidadeLote.data);
-                      console.log("gerido por lotes sap",geridoPorLotesSAP.data);
+                      console.log("quantidades sap", quantidadeLote.data);
+                      console.log(
+                        "gerido por lotes sap",
+                        geridoPorLotesSAP.data
+                      );
                     }}
                   >
                     {quantidadeLote.isRefetching ||
@@ -929,7 +939,6 @@ const Pickagem = () => {
                                           >
                                             <Trash2 />
                                           </Button>
-
                                         </dl>
                                         <Separator className="mt-1" />
                                       </div>
@@ -1102,10 +1111,12 @@ const Pickagem = () => {
                             const atualizarDocumentLinesGlobal = produce(
                               documentLinesGlobal,
                               (draft) => {
-                                
                                 draft.length = 0;
 
-                                draft.push(...documentLines,...documentLinesBatchN);
+                                draft.push(
+                                  ...documentLines,
+                                  ...documentLinesBatchN
+                                );
                                 /*
                                 documentLines.forEach((docLine) =>{
                                   
@@ -1129,53 +1140,55 @@ const Pickagem = () => {
                               etiquetas,
                               (draft) => {
                                 draft.length = 0;
-                                itensValidados.forEach((itemValidado, index) => {
-                                  console.log(
-                                    "itens validados",
-                                    itensValidados
-                                  );
-                                  console.log(
-                                    "data validade itens validados",
-                                    dataValidadeItensValidados
-                                  );
-                                  if (itemValidado.ItemCode !== "") {
-                                    draft.push(
-                                      `^XA${logotipoEgiquimicaZPL}^CF0,60^FO220,50^FDEgiquimica^FS^CF0,30^FO220,115^FDParque Industrial Guarda, Lt.10/15^FS^FO220,155^FDGuarda^FS^FO220,195^FDPortugal (PT)^FS^FO50,245^GB700,3,3^FS^CFD,50^FO50,265^FDOrdem Compra:^FS^CFA,45^FO50,315^FD${
-                                        OrdemCompra.data?.DocumentLines.find(
-                                          (itemOrdem) =>
-                                            itemOrdem.ItemCode ===
-                                            itemValidado.ItemCode
-                                        )?.DocEntry
-                                      }^FS^CFD,50^FO50,400^FDLote:^FS^CFA,45^FO50,450^FD${numeroLote}^FS^CFD,50^FO50,550^FDValidade:^FS^CFA,45^FO50,600^FD${format(
-                                        dataValidadeItensValidados[index - 1]
-                                          .dataValidade,
-                                        "P",
-                                        { locale: pt }
-                                      )}^FS^CFA,50^FO50,700^FD${datahora.toISOString()}^FS^FO515,255^BQ,,6^FD123F:MateriaPrima&C1:${
-                                        itemValidado.ItemCode
-                                      }&C2:${
-                                        OrdemCompra.data?.DocumentLines.find(
-                                          (itemOrdem) =>
-                                            itemOrdem.ItemCode ===
-                                            itemValidado.ItemCode
-                                        )?.ItemDescription
-                                      }&C3:${
-                                        OrdemCompra.data?.CardCode
-                                      }&C4:${numeroLote}&C5:${format(
-                                        dataValidadeItensValidados[index - 1]
-                                          .dataValidade,
-                                        "P",
-                                        { locale: pt }
-                                      )}&C6:${format(
-                                        datahora.toISOString(),
-                                        "P",
-                                        { locale: pt }
-                                      )}&^FS^FO50,775^GB700,100,3^FS^FO50,875^GB700,300,3^FS^CF0,200^FO60,940^FD${
-                                        itemValidado.ItemCode
-                                      }^FS^CF0,50^FO250,800^FDMateria Prima^FS^XZ^PQ2`
+                                itensValidados.forEach(
+                                  (itemValidado, index) => {
+                                    console.log(
+                                      "itens validados",
+                                      itensValidados
                                     );
+                                    console.log(
+                                      "data validade itens validados",
+                                      dataValidadeItensValidados
+                                    );
+                                    if (itemValidado.ItemCode !== "") {
+                                      draft.push(
+                                        `^XA${logotipoEgiquimicaZPL}^CF0,60^FO220,50^FDEgiquimica^FS^CF0,30^FO220,115^FDParque Industrial Guarda, Lt.10/15^FS^FO220,155^FDGuarda^FS^FO220,195^FDPortugal (PT)^FS^FO50,245^GB700,3,3^FS^CFD,50^FO50,265^FDOrdem Compra:^FS^CFA,45^FO50,315^FD${
+                                          OrdemCompra.data?.DocumentLines.find(
+                                            (itemOrdem) =>
+                                              itemOrdem.ItemCode ===
+                                              itemValidado.ItemCode
+                                          )?.DocEntry
+                                        }^FS^CFD,50^FO50,400^FDLote:^FS^CFA,45^FO50,450^FD${numeroLote}^FS^CFD,50^FO50,550^FDValidade:^FS^CFA,45^FO50,600^FD${format(
+                                          dataValidadeItensValidados[index - 1]
+                                            .dataValidade,
+                                          "P",
+                                          { locale: pt }
+                                        )}^FS^CFA,50^FO50,700^FD${datahora.toISOString()}^FS^FO515,255^BQ,,6^FD123F:MateriaPrima&C1:${
+                                          itemValidado.ItemCode
+                                        }&C2:${
+                                          OrdemCompra.data?.DocumentLines.find(
+                                            (itemOrdem) =>
+                                              itemOrdem.ItemCode ===
+                                              itemValidado.ItemCode
+                                          )?.ItemDescription
+                                        }&C3:${
+                                          OrdemCompra.data?.CardCode
+                                        }&C4:${numeroLote}&C5:${format(
+                                          dataValidadeItensValidados[index - 1]
+                                            .dataValidade,
+                                          "P",
+                                          { locale: pt }
+                                        )}&C6:${format(
+                                          datahora.toISOString(),
+                                          "P",
+                                          { locale: pt }
+                                        )}&^FS^FO50,775^GB700,100,3^FS^FO50,875^GB700,300,3^FS^CF0,200^FO60,940^FD${
+                                          itemValidado.ItemCode
+                                        }^FS^CF0,50^FO250,800^FDMateria Prima^FS^XZ^PQ2`
+                                      );
+                                    }
                                   }
-                                });
+                                );
                               }
                             );
                             setEtiquetas(atualizarListaEtiquetas);
@@ -1215,6 +1228,7 @@ const Pickagem = () => {
                               })
                             );
                             setValidouValores(false);
+                            
                             const atualizarItensValidados = produce(
                               itensValidados,
                               (draft) => {
