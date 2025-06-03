@@ -41,19 +41,6 @@ interface DataTableProps<TData, TValue> {
   data: TData[];
 }
 
-interface leitorQR {
-  status: string;
-  value: {
-    C1: string;
-    C2: string;
-    C3: string;
-    C4: string;
-    C5: string;
-    C6: string;
-    F: string;
-  };
-}
-
 function isJSON(str: string) {
   try {
     JSON.parse(str);
