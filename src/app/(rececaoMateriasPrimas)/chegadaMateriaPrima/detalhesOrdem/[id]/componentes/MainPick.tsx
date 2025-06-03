@@ -385,7 +385,8 @@ const MainPickagem: React.FC = () => {
                               className="w-[85px]"
                               type="number"
                               min="0"
-                              defaultValue={item.quantidade}
+                              max={item.quantidade}
+                              defaultValue={0}
                               onChange={(e) => handleQuantityChange(item.baseLine, e.target.value)}
                             />
                           </div>
