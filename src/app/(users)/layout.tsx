@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "../globals.css";
-import { Providers } from "./app/providers";
-
+import { Toaster } from "@/components/ui/sonner";
+import TanstackProvider from "../../../providers/TanstackProvider";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
@@ -16,11 +16,12 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="no-scrollbar h-full min-h-full">
-      <body>
-        <Providers>
-          <section className={inter.className}>{children}</section>
-        </Providers>
+    <html lang="en" className="no-scrollbar">
+      <body className={inter.className}>
+        <TanstackProvider>
+          <section>{children}</section>
+        </TanstackProvider>
+        <Toaster closeButton />
       </body>
     </html>
   );

@@ -243,7 +243,7 @@ const Page = () => {
       <section className="border-2 border-slate-600 rounded-md p-5 shadow-2xl items-center h-full min-h-screen justify-start m-1 max-w-full">
         <Retorceder />
         <div className="flex flex-row gap-x-1">
-          <div className="border-2 border-lime-500 rounded-md p-5 shadow-2xl items-center h-full min-h-screen justify-start m-1 max-w-full mx-auto w-1/4">
+          <div className="border-2 border-lime-500 rounded-md p-5 shadow-2xl items-center min-h-screen justify-start max-w-full mx-auto w-1/4">
             <div>
               <div className="mt-2">
                 <h3 className="text-base font-semibold leading-7 text-gray-900">
@@ -261,7 +261,7 @@ const Page = () => {
                     setRealizouFetchArtigo(false);
                   }}
                 >
-                  <SelectTrigger className="w-[320px]">
+                  <SelectTrigger className="w-auto">
                     <SelectValue placeholder="Selecione o  Nº artigo" />
                   </SelectTrigger>
                   <SelectContent>
@@ -607,7 +607,7 @@ const Page = () => {
               </div>
             </div>
           </div>
-          <div className="border-2 border-lime-500 rounded-md p-5 shadow-2xl items-center h-full min-h-screen justify-start m-1 max-w-full mx-auto w-9/12">
+          <div className="border-2 border-lime-500 rounded-md p-5 shadow-2xl items-center min-h-screen justify-start max-w-full mx-auto w-9/12">
             <div className="flex flex-row items-center justify-between">
               <div>Editor de Receitas</div>
               {artigo === "" ? (

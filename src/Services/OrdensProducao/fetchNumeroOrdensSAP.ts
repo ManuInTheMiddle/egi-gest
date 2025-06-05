@@ -7,17 +7,34 @@ interface FetchNumeroOrdensSAPI {
 }
 
 const dataTeste = "2024-02-14";
-export const useFetchNumeroOrdensSAPData = (
-  periodoData: FetchNumeroOrdensSAPI["periodoData"] = dataTeste
+export const useFetchNumeroOrdensSAPProduction = (
+  periodoData: string = dataTeste
 ) => {
-  return useQuery({
-    queryKey: ["numeroOrdensSAPdata"],
+  return useQuery<number, Error>({
+    queryKey: ["numeroOrdensSAP", periodoData],
+    
     queryFn: async () => {
-      const { data } = await axios.get(
-        `http://egiquim-sap:50001/b1s/v1/ProductionOrders/$count?$filter=CreationDate ge '${periodoData}' and U_Tipo eq 'R'`,
-        { withCredentials: true }
+      const { data } = await axios.get<number>(
+        `http://egiquim-sap:50001/b1s/v1/ProductionOrders/$count`,
+        {
+          params: {
+            $filter: `CreationDate ge '${periodoData}' and U_Tipo eq 'R'`
+          },
+          withCredentials: true,
+          timeout: 10000,
+        }
       );
-      return data as number;
+      
+      if (typeof data !== 'number') {
+        throw new Error('Invalid response: expected a number');
+      }
+      
+      return data;
     },
+    
+    enabled: !!periodoData,
+    staleTime: 30000,
+    gcTime: 300000,
+    retry: 3,
   });
 };

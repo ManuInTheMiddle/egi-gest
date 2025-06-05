@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "../globals.css";
-import Navbar from "@/components/ui/navbar";
+import Navbar from "@/app/(main)/componentes/navbar";
 import Footer from "@/components/ui/footer";
 import TanstackProvider from "../../../providers/TanstackProvider";
 

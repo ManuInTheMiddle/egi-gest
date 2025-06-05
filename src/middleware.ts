@@ -1,91 +1,114 @@
-import { withAuth, NextRequestWithAuth } from "next-auth/middleware";
+// middleware.ts
+import { withAuth } from "next-auth/middleware";
 import { NextResponse } from "next/server";
 
+// Define route access control
+const ROUTE_ACCESS: Record<string, string[]> = {
+  "/": ["admin", "gestor"],
+  "/chegadaMateriaPrima": ["admin", "gestor", "rececaomp"],
+  "/receitas": ["admin", "gestor", "receitas"],
+  "/producao": ["admin", "gestor", "formulacao"],
+  "/produtoAcabado": ["admin", "gestor", "producao"],
+  "/expedicao": ["admin", "gestor", "expedicao"],
+  "/opcoes": ["admin", "gestor"],
+  "/users": ["admin"],
+  "/configuracoes": ["admin"],
+  "/relatorios": ["admin", "gestor"],
+};
+
+// Define default landing pages
+const DEFAULT_PAGES: Record<string, string> = {
+  admin: "/",
+  gestor: "/producao",
+  rececaomp: "/chegadaMateriaPrima",
+  receitas: "/receitas",
+  formulacao: "/producao",
+  producao: "/produtoAcabado",
+  expedicao: "/expedicao",
+};
+
+// Public routes
+const PUBLIC_ROUTES = ["/login", "/api/auth", "/denied"];
+
+function hasAccess(userRole: string, pathname: string): boolean {
+  if (PUBLIC_ROUTES.some((route) => pathname.startsWith(route))) {
+    return true;
+  }
+
+  if (userRole === "admin") {
+    return true;
+  }
+
+  for (const [route, allowedRoles] of Object.entries(ROUTE_ACCESS)) {
+    if (pathname.startsWith(route)) {
+      return allowedRoles.includes(userRole);
+    }
+  }
+
+  return true;
+}
+
+function getDefaultPage(userRole: string): string {
+  return DEFAULT_PAGES[userRole] || "/producao";
+}
+
 export default withAuth(
-  async function middleware(request: NextRequestWithAuth) {
-    console.log(request.nextUrl.pathname);
-    console.log(request.nextauth.token);
+  async function middleware(request) {
+    const { pathname } = request.nextUrl;
+    const token = request.nextauth.token;
+    const userRole = token?.role as string;
+    const username = token?.name || token?.username || "unknown";
 
-    
-   
-    if (
-      request.nextUrl.pathname.startsWith("/chegadaMateriaPrima") &&
-      request.nextauth.token?.role !== "admin" &&
-      request.nextauth.token?.role !== "gestor" &&
-      request.nextauth.token?.role !== "rececaomp"
-    ) {
-      console.log(request.nextauth.token?.role)
+    console.log(`Middleware: ${username} (${userRole}) accessing ${pathname}`);
+
+    // Skip for API routes and static files
+    if (pathname.startsWith("/_next") || pathname.startsWith("/api")) {
+      return NextResponse.next();
+    }
+
+    // Skip middleware for NextAuth routes completely
+    if (pathname.startsWith("/api/auth")) {
+      return NextResponse.next();
+    }
+
+    // Handle root path - DON'T redirect admin and gestor
+    if (pathname === "/") {
+      if (userRole === "admin" || userRole === "gestor") {
+        // Allow admin and gestor to access home page
+        console.log(`${userRole} accessing home page - allowing access`);
+        return NextResponse.next();
+      } else {
+        // Redirect other users to their default page
+        const defaultPage = getDefaultPage(userRole);
+        console.log(`Redirecting ${userRole} from / to ${defaultPage}`);
+        return NextResponse.redirect(new URL(defaultPage, request.url));
+      }
+    }
+
+    // Check access for other paths
+    const allowed = hasAccess(userRole, pathname);
+
+    if (!allowed) {
+      console.log(`Access denied for ${username} to ${pathname}`);
       return NextResponse.rewrite(new URL("/denied", request.url));
     }
 
-    if (
-      request.nextUrl.pathname.startsWith("/receitas") &&
-      request.nextauth.token?.role !== "admin" &&
-      request.nextauth.token?.role !== "gestor" &&
-      request.nextauth.token?.role !== "receitas"
-    ) {
-      console.log(request.nextauth.token?.role)
-      return NextResponse.rewrite(new URL("/denied", request.url));
-    }
-
-    if (
-      request.nextUrl.pathname.startsWith("/producao") &&
-      request.nextauth.token?.role !== "admin" &&
-      request.nextauth.token?.role !== "gestor" &&
-      request.nextauth.token?.role !== "formulacao"
-    ) {
-      console.log(request.nextauth.token?.role)
-      return NextResponse.rewrite(new URL("/denied", request.url));
-    }
-
-    if (
-      request.nextUrl.pathname.startsWith("/produtoAcabado") &&
-      request.nextauth.token?.role !== "admin" &&
-      request.nextauth.token?.role !== "gestor" &&
-      request.nextauth.token?.role !== "producao"
-    ) {
-      console.log(request.nextauth.token?.role)
-      return NextResponse.rewrite(new URL("/denied", request.url));
-    }
-
-    if (
-      request.nextUrl.pathname.startsWith("/expedicao") &&
-      request.nextauth.token?.role !== "admin" &&
-      request.nextauth.token?.role !== "gestor" &&
-      request.nextauth.token?.role !== "expedicao"
-    ) {
-      console.log(request.nextauth.token?.role)
-      return NextResponse.rewrite(new URL("/denied", request.url));
-    }
-
-    if (
-      request.nextUrl.pathname.startsWith("/opcoes") &&
-      request.nextauth.token?.role !== "admin" &&
-      request.nextauth.token?.role !== "gestor"
-  
-    ) {
-      console.log(request.nextauth.token?.role)
-      return NextResponse.rewrite(new URL("/denied", request.url));
-    }
+    return NextResponse.next();
   },
   {
     callbacks: {
-      authorized: ({ token }) => !!token,
+      authorized: ({ token, req }) => {
+        // Allow all requests to login page
+        if (req.nextUrl.pathname === "/login") {
+          return true;
+        }
+        // For other routes, require token
+        return !!token;
+      },
     },
   }
 );
 
 export const config = {
-  matcher: [
-    "/",
-    "/chegadaMateriaPrima",
-    "/receitas",
-    "/ordemFabrico",
-    "/producao",
-    "/producaoAcabado",
-    "/expedicao",
-    "/maisPrafrente",
-    "/opcoes",
-    "/denied"
-  ],
+  matcher: ["/((?!api/auth|_next/static|_next/image|favicon.ico|assets).*)",],
 };
