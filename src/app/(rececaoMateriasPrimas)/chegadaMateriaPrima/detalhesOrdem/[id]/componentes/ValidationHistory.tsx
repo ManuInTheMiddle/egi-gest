@@ -12,7 +12,7 @@ const ValidationHistory: React.FC<ValidationHistoryProps> = ({
   const validItems = validatedItems.filter(item => item.ItemCode !== "");
 
   return (
-    <div className="space-y-6 rounded-lg border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-800">
+    <div className="space-y-6 rounded-lg border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-800 mb-2">
       <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
         Histórico Ordem
       </h3>

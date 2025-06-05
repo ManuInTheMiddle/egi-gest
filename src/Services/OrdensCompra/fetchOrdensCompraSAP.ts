@@ -1,6 +1,8 @@
 import axios from "axios";
 import { useQuery } from "@tanstack/react-query";
+import { purchaseOrderKeys } from "./purchaseOrderKeys";
 
+// Keep all your existing interfaces exactly as they are
 interface DocumentLine {
   LineNum: number;
   ItemCode: string;
@@ -510,18 +512,15 @@ export interface ApiResponse {
   "odata.nextLink": string | null;
 }
 
-interface FetchOrdensCompraSAPDataI {
-  periodoData: string;
-  pagina: number;
-}
-
+// ✅ UPDATED: Main orders query with fixed query key
 const dataTeste = "2024-02-14";
 export const useFetchOrdensCompraSAPData = (
-  periodoData: FetchOrdensCompraSAPDataI["periodoData"] = dataTeste,
-  pagina: FetchOrdensCompraSAPDataI["pagina"] = 0
+  periodoData: string = dataTeste,
+  pagina: number = 0
 ) => {
   return useQuery({
-    queryKey: ["ordensCompraSAP"],
+    // ✅ FIXED: Query key now includes parameters
+    queryKey: purchaseOrderKeys.list(periodoData, pagina),
     queryFn: async () => {
       const { data } = await axios.get(
         `http://egiquim-sap:50001/b1s/v1/PurchaseOrders?$filter=DocDate ge '${periodoData}'&$skip=${pagina}`,
@@ -529,8 +528,59 @@ export const useFetchOrdensCompraSAPData = (
       );
       return data as ApiResponse;
     },
+    // Keep your existing options but add optimizations
     refetchInterval: 1000 * 60 * 5,
     refetchIntervalInBackground: true,
     staleTime: 1000 * 60 * 5,
+    // ✅ NEW: Added optimizations
+    gcTime: 1000 * 60 * 10, // 10 minutes cache
+    enabled: !!periodoData, // Only run if we have a date
+    retry: (failureCount, error: any) => {
+      if (error?.response?.status === 401 || error?.response?.status === 403) {
+        return false;
+      }
+      return failureCount < 3;
+    },
+    // ✅ NEW: Transform data for easier consumption
+    select: (data) => ({
+      ...data,
+      totalItems: data.value.length,
+      hasNextPage: !!data["odata.nextLink"],
+      orders: data.value
+    })
+  });
+};
+
+// ✅ NEW: Single order query for picking component
+export const useFetchUmaOrdemCompraSAPData = (orderId: number) => {
+  return useQuery({
+    queryKey: purchaseOrderKeys.detail(orderId),
+    queryFn: async () => {
+      const { data } = await axios.get(
+        `http://egiquim-sap:50001/b1s/v1/PurchaseOrders(${orderId})`,
+        { withCredentials: true }
+      );
+      return data as PurchaseOrder;
+    },
+    staleTime: 1000 * 60 * 5, // 5 minutes
+    gcTime: 1000 * 60 * 10,
+    enabled: !!orderId && orderId > 0,
+    retry: (failureCount, error: any) => {
+      if (error?.response?.status === 404) return false; // Order not found
+      return failureCount < 3;
+    },
+    // ✅ NEW: Pre-process data for picking interface
+    select: (data) => ({
+      ...data,
+      // Add computed fields for easier use in picking
+      totalLines: data.DocumentLines.length,
+      openLines: data.DocumentLines.filter(line => line.LineStatus === 'bost_Open').length,
+      completedLines: data.DocumentLines.filter(line => line.LineStatus === 'bost_Close').length,
+      hasOpenLines: data.DocumentLines.some(line => line.LineStatus === 'bost_Open'),
+      progressPercentage: Math.round(
+        (data.DocumentLines.filter(line => line.LineStatus === 'bost_Close').length / 
+         data.DocumentLines.length) * 100
+      )
+    })
   });
 };

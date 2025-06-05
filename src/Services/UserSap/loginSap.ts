@@ -2,7 +2,7 @@ import { useMutation } from "@tanstack/react-query";
 import axios from "axios";
 
 const UTILIZADOR = {
-  CompanyDB: "Egiquimica_TST",
+  CompanyDB: "Egiquimica_TST3",
   Password: "egisap",
   UserName: "manager",
 };
