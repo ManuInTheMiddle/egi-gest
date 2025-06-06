@@ -1,4 +1,4 @@
-export const WEBSOCKET_URL = "ws://localhost:8080/pickagem";
+export const WEBSOCKET_URL = process.env.NEXT_PUBLIC_WS_REC || "ws://localhost:8081/pickagem";
 
 export const PICKING_STATES = {
   SUCCESS: 'success',

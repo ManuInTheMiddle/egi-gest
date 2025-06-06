@@ -1,11 +1,46 @@
+// app/login/page.tsx - Fixed with Suspense boundary
 "use client";
+import { Suspense } from "react";
 import { getSession, signIn } from "next-auth/react";
 import { useState, useEffect } from "react";
-import { useRouter, useSearchParams } from "next/navigation"; // ✅ Correct imports
+import { useRouter, useSearchParams } from "next/navigation";
 
-export default function LoginPage() {
+// Loading component for Suspense fallback
+function LoginLoading() {
+  return (
+    <div className="flex h-screen">
+      <div className="flex flex-1 flex-col justify-center px-4 py-12 sm:px-6 lg:flex-none lg:px-20 xl:px-24">
+        <div className="mx-auto w-full max-w-sm lg:w-96">
+          <div>
+            <img
+              alt="egiquimica"
+              src="assets/images/Egiquimica-Logotipo.png"
+              className="h-10 w-auto"
+            />
+            <h2 className="mt-8 text-2xl font-bold leading-9 tracking-tight text-gray-900">
+              A carregar...
+            </h2>
+          </div>
+          <div className="mt-10 flex justify-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-lime-600"></div>
+          </div>
+        </div>
+      </div>
+      <div className="relative w-0 flex-1 lg:block h-full">
+        <img
+          alt=""
+          src="assets/webp/factory2.webp"
+          className="absolute inset-0 h-full w-full object-cover"
+        />
+      </div>
+    </div>
+  );
+}
+
+// Main login form component that uses useSearchParams
+function LoginForm() {
   const router = useRouter();
-  const searchParams = useSearchParams();
+  const searchParams = useSearchParams(); // ✅ Now properly wrapped in Suspense
   const [usernameField, setUsernameField] = useState('');
   const [passwordField, setPasswordField] = useState('');
   const [isEmpty, setIsEmpty] = useState(true);
@@ -80,7 +115,7 @@ export default function LoginPage() {
             : getRoleRedirectUrl(session.user.role);
           
           console.log(`Redirecting ${session.user.role} user to: ${redirectUrl}`);
-          router.push(redirectUrl); // ✅ This will now work
+          router.push(redirectUrl);
         } else {
           setError('Erro ao obter informações da sessão');
         }
@@ -224,5 +259,14 @@ export default function LoginPage() {
         />
       </div>
     </div>
+  );
+}
+
+// Main page component with Suspense wrapper
+export default function LoginPage() {
+  return (
+    <Suspense fallback={<LoginLoading />}>
+      <LoginForm />
+    </Suspense>
   );
 }

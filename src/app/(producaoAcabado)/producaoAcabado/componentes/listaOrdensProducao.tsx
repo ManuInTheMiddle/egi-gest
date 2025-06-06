@@ -87,7 +87,7 @@ const ListaOrdensProducao = () => {
     setNumeroPagina(atualizarPagina);
   };
   /////////////////////////////////////////////////////////////////////////////
-  const { lastMessage } = useWebSocket("ws://localhost:8080/pickagem", {
+  const { lastMessage } = useWebSocket(process.env.NEXT_PUBLIC_WS_PROD||"ws://localhost:8081/pickagem", {
     onOpen(event) {
       console.log("websocket aberto");
     },

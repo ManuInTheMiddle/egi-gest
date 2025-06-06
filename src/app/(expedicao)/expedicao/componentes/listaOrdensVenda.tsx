@@ -350,7 +350,7 @@ const ListaOrdensVenda: React.FC = () => {
   const artigoGeridoPorLotesSAP = useFetchBatchManagedSAPData(artigo);
 
   // WebSocket
-  const { lastMessage } = useWebSocket("ws://localhost:8080/pickagem", {
+  const { lastMessage } = useWebSocket(process.env.NEXT_PUBLIC_WS_EXP || "ws://localhost:8081/pickagem", {
     onOpen: () => console.log("websocket aberto"),
     onMessage: (event: MessageEvent) => {
       if (!isJSON(event.data)) return;

@@ -153,7 +153,7 @@ const Pickagem = () => {
   const [documentLinesGlobal, setDocumentLinesGlobal] = useState<any[]>([]);
   const [etiquetas, setEtiquetas] = useState<string[]>([]);
   const [validouValores, setValidouValores] = useState(false);
-  const { lastMessage } = useWebSocket("ws://localhost:8080/pickagem", {
+  const { lastMessage } = useWebSocket(process.env.NEXT_PUBLIC_WS_REC||"ws://localhost:8081/pickagem", {
     onOpen(event) {
       console.log(event);
       console.log("websocket aberto");
