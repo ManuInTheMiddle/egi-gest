@@ -13,7 +13,7 @@ import {
   Tooltip,
 } from "@/components/ui/tooltip";
 
-const BASE_URL = process.env.NEXT_PUBLIC_HOST;
+const BASE_URL_SCADA = process.env.NEXT_PUBLIC_SCADA_BASE_URL;
 
 const RenderizarTable = () => {
   const [data, setData] = useState([]);
@@ -28,7 +28,7 @@ const RenderizarTable = () => {
     //console.log(pagNum);
     try {
       const resposta = await axios.get(
-        `http://DESKTOP-74D6VT2:8080/api/historicoOrdensProducao/pag/${pagNum.current}`
+        `${BASE_URL_SCADA}/api/historicoOrdensProducao/pag/${pagNum.current}`
       );
       const dados = await resposta.data;
       setData(dados);
@@ -48,7 +48,7 @@ const RenderizarTable = () => {
     //console.log(pagNum);
     try {
       const resposta = await axios.get(
-        `http://DESKTOP-74D6VT2:8080/api/historicoOrdensProducao/pag/${pagNum.current}`
+        `${BASE_URL_SCADA}/api/historicoOrdensProducao/pag/${pagNum.current}`
       );
       const dados = await resposta.data;
       setData(dados);
@@ -63,8 +63,9 @@ const RenderizarTable = () => {
 
   const getHistoricoOrdens = async () => {
     const resposta = await axios.get(
-      `http://DESKTOP-74D6VT2:8080/api/historicoOrdensProducao/pag/${pagNum.current}`
+      `${BASE_URL_SCADA}/api/historicoOrdensProducao/pag/${pagNum.current}`
     );
+
     const dados = await resposta.data;
     setData(dados);
     console.log(dados);
