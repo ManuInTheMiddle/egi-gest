@@ -1,13 +1,15 @@
 import { useMutation } from "@tanstack/react-query";
 import axios from "axios";
 
+const BASE_API_URL = process.env.NEXT_PUBLIC_SCADA_BASE_URL;
+
 interface ApagarReceitasSCADAI {
   id: string;
 }
 
 const apagarReceitaSCADA = async(id: ApagarReceitasSCADAI["id"]) => {
   return await axios
-    .delete(`http://DESKTOP-74D6VT2:8080/api/receita/id/${id}`)
+    .delete(`${BASE_API_URL}/api/receita/id/${id}`)
     .then((response) => {
       console.log(response.data);
       console.log(response.data.SessionId);

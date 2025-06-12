@@ -10,7 +10,7 @@ export const useFetchNumeroOrdensCompraSAPData = (
   periodoData: FetchNumeroOrdensCompraSAPI["periodoData"] = dataTeste
 ) => {
   return useQuery({
-    queryKey: ["numeroOrdensCompraSAPdata"],
+    queryKey: ["numeroOrdensCompraSAPdata",periodoData],
     queryFn: async () => {
       const { data } = await axios.get(
         `http://egiquim-sap:50001/b1s/v1/PurchaseOrders/$count?$filter=DocDate ge '${periodoData}'`,

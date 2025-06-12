@@ -1,6 +1,8 @@
 import axios, { AxiosError } from "axios";
 import { useQuery } from "@tanstack/react-query";
 
+const BASE_API_URL = process.env.NEXT_PUBLIC_SCADA_BASE_URL;
+
 // Fixed interface name (should start with capital letter and match your Go backend)
 interface ConsumosSCADA {
   IdConsumos: number;
@@ -18,7 +20,7 @@ interface FetchConsumosSCADAI {
 
 // Create axios instance with better configuration
 const scadaApi = axios.create({
-  baseURL: 'http://DESKTOP-74D6VT2:8080/api',
+  baseURL: `${BASE_API_URL}/api`,
   timeout: 45000, // 45 seconds timeout
   headers: {
     'Accept': 'application/json',

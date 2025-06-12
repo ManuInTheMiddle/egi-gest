@@ -1,6 +1,8 @@
 import axios from "axios";
 import { useQuery } from "@tanstack/react-query";
 
+const BASE_API_URL = process.env.NEXT_PUBLIC_SCADA_BASE_URL;
+
 interface OrdemProducaoSCADA {
   idOrdemProducao: number;
   numeroOrdemProducao: number;
@@ -23,7 +25,7 @@ export const useFetchOrdemProdSCADA = (id: string, enabled: boolean = false) => 
 
       try {
         const { data } = await axios.get(
-          `http://DESKTOP-74D6VT2:8080/api/ordemProducao/numOP/${id}`,
+          `${BASE_API_URL}/api/ordemProducao/numOP/${id}`,
           {
             timeout: 10000, // 10 second timeout
             headers: {

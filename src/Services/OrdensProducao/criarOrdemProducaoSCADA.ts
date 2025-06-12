@@ -1,9 +1,11 @@
 import { useMutation } from "@tanstack/react-query";
 import axios from "axios";
 
+const BASE_API_URL = process.env.NEXT_PUBLIC_SCADA_BASE_URL;
+
 const criarOrdemProducaoSCADA = async (body: any) => {
   return await axios
-    .post("http://DESKTOP-74D6VT2:8080/api/ordemProducao", body)
+    .post(`${BASE_API_URL}/api/ordemProducao`, body)
     .then((response) => {
       console.log(response.data);
       console.log(response.data.SessionId);

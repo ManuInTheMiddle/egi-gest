@@ -60,7 +60,7 @@ const receitaDefault = "214"
 export const useFetchRecipeMateriaPrimaData = (receita: string = receitaDefault
 ) => {
   return useQuery({
-    queryKey: ["informacaoMateriasPrimasReceita"],
+    queryKey: ["informacaoMateriasPrimasReceita",receita],
     queryFn: async () => {
       const { data } = await axios.get(
         `http://egiquim-sap:50001/b1s/v1/ProductTrees('${receita}')`,

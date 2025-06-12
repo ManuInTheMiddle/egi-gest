@@ -39,8 +39,8 @@ export default function Options() {
       href: "/expedicao",
     },
     {
-      label: "maisPrafrente",
-      href: "/maisPrafrente",
+      label: "inventario",
+      href: "/inventario",
     },
   ];
 
@@ -126,7 +126,7 @@ export default function Options() {
           </CardFooter>
         </Card>
       </a>
-      <a href="maisPrafrente">
+      <a href="inventario">
         <Card
           className={`${
             links[6].href.startsWith(currentPathname.toString())
@@ -138,7 +138,7 @@ export default function Options() {
             <Warehouse />
           </CardContent>
           <CardFooter>
-            <p>opçao a adicionar</p>
+            <p>Inventário</p>
           </CardFooter>
         </Card>
       </a>

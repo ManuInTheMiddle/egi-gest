@@ -15,7 +15,7 @@ export async function GET() {
       );
     }
 
-    const SCADA_BASE_URL = process.env.SCADA_BASE_URL || 'http://DESKTOP-74D6VT2:8080';
+    const SCADA_BASE_URL = process.env.SCADA_BASE_URL || 'http://192.168.1.251:8080';
 
     // Get all users
     const response = await fetch(`${SCADA_BASE_URL}/api/users`, {

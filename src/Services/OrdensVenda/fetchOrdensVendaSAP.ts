@@ -529,7 +529,7 @@ export const useFetchOrdensVendaSAPData = (
   pagina: FetchOrdensVendaSAPDataI["pagina"] = 0
 ) => {
   return useQuery({
-    queryKey: ["ordensVendaSAP"],
+    queryKey: ["ordensVendaSAP",periodoData,pagina],
     queryFn: async () => {
       const { data } = await axios.get(
         `http://egiquim-sap:50001/b1s/v1/Orders?$filter=UpdateDate ge '${periodoData}' and DocumentStatus eq 'bost_Open'&$skip=${pagina}`,

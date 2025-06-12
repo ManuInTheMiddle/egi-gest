@@ -505,14 +505,11 @@ export interface PurchaseOrder {
   DocumentReferences: any[];
   "odata.nextLink": string | null;
 }
-/*
-export interface ApiResponse {
-  value: PurchaseOrder[];
-}
-*/
+
+
 export const useFetchUmaOrdemCompraSAPData = (DocEntry: number) => {
   return useQuery({
-    queryKey: ["ordemCompraSAP"],
+    queryKey: ["ordemCompraSAP",DocEntry],
     queryFn: async () => {
       const { data } = await axios.get(
         `http://egiquim-sap:50001/b1s/v1/PurchaseOrders(${DocEntry})`,

@@ -369,7 +369,7 @@ const receitaDefault = "214d"
 export const useFetchRecipeInformationData = (receita:string=receitaDefault
   ) => {
     return useQuery({
-      queryKey: ["informacaoReceita"],
+      queryKey: ["informacaoReceita",receita],
       queryFn: async () => {
         const { data } = await axios.get(
           `http://egiquim-sap:50001/b1s/v1/Items('${receita}')`,

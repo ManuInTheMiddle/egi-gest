@@ -647,7 +647,7 @@ export const useFetchRececoesMercadoriaSAPData = (
   pagina: FetchRececoesMercadoriaSAPDataI["pagina"] = 0
 ) => {
   return useQuery({
-    queryKey: ["rececoesMercadoriaSAP"],
+    queryKey: ["rececoesMercadoriaSAP",periodoData,pagina],
     queryFn: async () => {
       const { data } = await axios.get(
         `http://egiquim-sap:50001/b1s/v1/PurchaseDeliveryNotes?$filter=CreationDate ge '${periodoData}'&$skip=${pagina}`,

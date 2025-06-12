@@ -1,7 +1,7 @@
 import axios from "axios";
 import { useQuery } from "@tanstack/react-query";
 
-interface SAPQueryResult {
+export interface SAPQueryResultBatchNumberForItems {
   "odata.metadata": string;
   SqlText: string;
   value: ItemDetails[];
@@ -18,13 +18,13 @@ interface ItemDetails {
 
 export const useFetchQuantidadeArtigoLote = (artigo: string) => {
   return useQuery({
-    queryKey: ["quantidadeArtigoLote"],
+    queryKey: ["quantidadeArtigoLote", artigo],
     queryFn: async () => {
       const { data } = await axios.get(
         `http://egiquim-sap:50001/b1s/v1/SQLQueries('BatchNumberForItems')/List?ItemCode='${artigo}'`,
         { withCredentials: true }
       );
-      return data as SAPQueryResult;
+      return data as SAPQueryResultBatchNumberForItems;
     },
     enabled: false,
   });

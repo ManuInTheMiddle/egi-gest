@@ -2,6 +2,8 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
 import { toast } from "sonner"; // Add this import
 
+const BASE_API_URL = process.env.NEXT_PUBLIC_SCADA_BASE_URL;
+
 interface corpoUpdate {
   numeroOP: number;
   Reator: number;
@@ -9,7 +11,7 @@ interface corpoUpdate {
 
 const atualizarReatorOrdemSCADA = async (body: corpoUpdate) => {
   return await axios.patch(
-    `http://DESKTOP-74D6VT2:8080/api/ordemProducao/reator/${body.numeroOP}`,
+    `${BASE_API_URL}/api/ordemProducao/reator/${body.numeroOP}`,
     { reator: body.Reator },
     {
       headers: {

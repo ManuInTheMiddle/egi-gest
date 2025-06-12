@@ -119,7 +119,7 @@ export const useFetchOrdensSAPData = (
   }
   
   return useQuery({
-    queryKey: ["ordensProducaoSAP"],
+    queryKey: ["ordensProducaoSAP",estado,periodoData,pagina],
     queryFn: async () => {
       const { data } = await axios.get(
         `http://egiquim-sap:50001/b1s/v1/ProductionOrders?$filter=ProductionOrderStatus eq '${estado}' and U_Tipo eq 'R' and CreationDate ge '${periodoData}'&$skip=${pagina}`,

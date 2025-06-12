@@ -224,6 +224,27 @@ const Page = () => {
       ? setReceitaExisteNoSistema(true)
       : setReceitaExisteNoSistema(false);
   }, [receita, verificouExistenciaReceita]);
+  
+  useEffect(()=>{
+	  if(CriarReceitasScada.isSuccess){
+		toast.success("Receita criada com sucesso");
+	  }
+	  
+	  if(CriarReceitasScada.isError){
+		toast.error("Erro ao criar receita");
+	  }
+	  
+  },[CriarReceitasScada.isSuccess,CriarReceitasScada.isError])
+  
+  useEffect(()=>{
+	if(ApagarReceitaScada.isSuccess){
+		toast.success("Receita apagada com sucesso")
+	}
+
+	if(ApagarReceitaScada.isError){
+		toast.error("Erro ao apagar receita")
+	}	
+  },[ApagarReceitaScada.isSuccess,ApagarReceitaScada.isError])
 
   const [itemsList, setItemsList] = useState([
     {
@@ -1348,7 +1369,7 @@ const Page = () => {
                                   </span>
                                   {format(
                                     ReceitasSCADA.data![0].dataCriacao,
-                                    "yyyy-mm-dd HH:mm:ss"
+                                    "yyyy-MM-dd HH:mm:ss"
                                   )}
                                 </div>
                                 <div className="flex flex-col mx-auto">

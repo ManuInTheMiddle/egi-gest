@@ -1,6 +1,6 @@
 "use client";
 import React from "react";
-import Options from "@/components/ui/options";
+import Options from "@/app/(main)/componentes/options";
 
 export default function Home() {
   return (
