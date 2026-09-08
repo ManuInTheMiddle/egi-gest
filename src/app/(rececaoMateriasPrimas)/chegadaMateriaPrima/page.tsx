@@ -28,6 +28,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 const Page = () => {
   const hoje = new Date();
   const [date, setDate] = useState<Date>(new Date(hoje.getFullYear(), 0, 1));
+  const [estado, setEstado] = useState("");
+  const [numeroPagina, setNumeroPagina] = useState(0);
 
   const handleDateChange = (value: any) => {
     if (value) {
@@ -39,7 +41,6 @@ const Page = () => {
   //Logica de paginacao
   /////////////////////////////////////////////////////////////
 
-  const [numeroPagina, setNumeroPagina] = useState(0);
   const itensPorPagina = 20;
 
   const paginaAtual = Math.floor(numeroPagina / itensPorPagina) + 1;
@@ -50,7 +51,7 @@ const Page = () => {
 
   const handlePaginaAnterior = () => {
     setNumeroPagina((prev) =>
-      prev >= itensPorPagina ? prev - itensPorPagina : 0
+      prev >= itensPorPagina ? prev - itensPorPagina : 0,
     );
   };
   const handlePrimeiraPagina = () => {
@@ -60,7 +61,7 @@ const Page = () => {
 
   const ordensCompraSAP = useFetchOrdensCompraSAPData(
     format(date, "yyyy-MM-dd"),
-    numeroPagina
+    numeroPagina,
   );
   /////////////////////////////////////////////////////////////
 
@@ -80,7 +81,7 @@ const Page = () => {
                       variant={"outline"}
                       className={cn(
                         "w-[245px] justify-start text-left font-normal",
-                        !date && "text-muted-foreground"
+                        !date && "text-muted-foreground",
                       )}
                     >
                       <CalendarIcon className="mr-2 h-4 w-4" />

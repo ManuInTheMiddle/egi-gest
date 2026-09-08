@@ -55,6 +55,11 @@ function getDefaultPage(userRole: string): string {
 export default withAuth(
   async function middleware(request) {
     const { pathname } = request.nextUrl;
+
+    if (process.env.NEXT_PUBLIC_MOCK_AUTH === "true") {
+      return NextResponse.next();
+    }
+
     const token = request.nextauth.token;
     const userRole = token?.role as string;
     const username = token?.name || token?.username || "unknown";
@@ -98,6 +103,11 @@ export default withAuth(
   {
     callbacks: {
       authorized: ({ token, req }) => {
+        //caso esteja no modo de mock
+        if (process.env.NEXT_PUBLIC_MOCK_AUTH === "true") {
+          return true;
+        }
+
         // Allow all requests to login page
         if (req.nextUrl.pathname === "/login") {
           return true;
@@ -106,9 +116,9 @@ export default withAuth(
         return !!token;
       },
     },
-  }
+  },
 );
 
 export const config = {
-  matcher: ["/((?!api/auth|_next/static|_next/image|favicon.ico|assets).*)",],
+  matcher: ["/((?!api/auth|_next/static|_next/image|favicon.ico|assets).*)"],
 };

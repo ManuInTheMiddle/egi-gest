@@ -3,7 +3,7 @@ import { pt } from "date-fns/locale";
 
 export const formatDate = (
   date: string | Date,
-  formatStr: string = "P"
+  formatStr: string = "Pp"
 ): string => {
   const dateObj = typeof date === "string" ? new Date(date) : date;
   return format(dateObj, formatStr, { locale: pt });

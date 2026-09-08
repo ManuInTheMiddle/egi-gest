@@ -5,37 +5,75 @@ import Retorceder from "../componentes/retorceder";
 import { DataTable } from "../componentes/data-table";
 import { createColumns, ItemDetails } from "../componentes/columns";
 import { PrintModal } from "../componentes/printingModal";
-import {
-  SAPQueryResultBatchNumberForItems,
-  useFetchQuantidadeArtigoLote,
-} from "@/Services/LotesPorArtigo/fetchQuantidadeArtigoLote";
+import { TransferModal } from "../componentes/transferModal";
+import { useFetchQuantidadeArtigoLote } from "@/Services/LotesPorArtigo/fetchQuantidadeArtigoLote";
+
+import { useTranferenciaInvSAP } from "@/Services/Inventario/criacaoTransferenciaInv";
 
 function Page() {
   // State to manage the item code input
   const [artigo, setArtigo] = useState("");
   const [searchArtigo, setSearchArtigo] = useState("");
 
-  // Modal state
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [selectedItem, setSelectedItem] = useState<ItemDetails | null>(null);
+  // Print Modal state
+  const [isPrintModalOpen, setIsPrintModalOpen] = useState(false);
+  const [selectedPrintItem, setSelectedPrintItem] =
+    useState<ItemDetails | null>(null);
+
+  // Transfer Modal state
+  const [isTransferModalOpen, setIsTransferModalOpen] = useState(false);
+  const [selectedTransferItem, setSelectedTransferItem] =
+    useState<ItemDetails | null>(null);
 
   // Fetch data based on the search term
   const dadosLoteArtigo = useFetchQuantidadeArtigoLote(searchArtigo);
+  // Stock transfer mutation
+  const transferMutation = useTranferenciaInvSAP();
 
   // Handle opening the print modal
   const handleOpenPrintModal = (item: ItemDetails) => {
-    setSelectedItem(item);
-    setIsModalOpen(true);
+    setSelectedPrintItem(item);
+    setIsPrintModalOpen(true);
   };
 
-  // Handle closing the modal
-  const handleCloseModal = () => {
-    setIsModalOpen(false);
-    setSelectedItem(null);
+  // Handle closing the print modal
+  const handleClosePrintModal = () => {
+    setIsPrintModalOpen(false);
+    setSelectedPrintItem(null);
+  };
+
+  // Handle opening the transfer modal
+  const handleOpenTransferModal = (item: ItemDetails) => {
+    setSelectedTransferItem(item);
+    setIsTransferModalOpen(true);
+  };
+
+  // Handle closing the transfer modal
+  const handleCloseTransferModal = () => {
+    setIsTransferModalOpen(false);
+    setSelectedTransferItem(null);
+  };
+
+  // Handle stock transfer
+  // Handle stock transfer using React Query mutation
+  const handleStockTransfer = async (transferData: any) => {
+    try {
+      await transferMutation.mutateAsync(transferData);
+
+      // Show success message
+      alert("Transferência realizada com sucesso!");
+
+      // Refresh the data
+      dadosLoteArtigo.refetch();
+    } catch (error) {
+      console.error("Transfer failed:", error);
+      alert("Erro ao transferir stock. Tente novamente.");
+      throw error; // Re-throw to let the modal handle the error
+    }
   };
 
   // Create columns with action handlers
-  const columns = createColumns(handleOpenPrintModal);
+  const columns = createColumns(handleOpenPrintModal, handleOpenTransferModal);
 
   // Handle form submission
   const handleSearch = (e: React.FormEvent) => {
@@ -65,7 +103,6 @@ function Page() {
       </div>
 
       {/* Search Form */}
-
       <form
         onSubmit={handleSearch}
         className="container flex flex-row space-x-4 items-end"
@@ -100,7 +137,6 @@ function Page() {
       </form>
 
       {/* Results */}
-
       <div className="container">
         {dadosLoteArtigo.error && (
           <div className="mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded">
@@ -112,11 +148,19 @@ function Page() {
       </div>
 
       {/* Print Modal */}
-
       <PrintModal
-        isOpen={isModalOpen}
-        onClose={handleCloseModal}
-        item={selectedItem}
+        isOpen={isPrintModalOpen}
+        onClose={handleClosePrintModal}
+        item={selectedPrintItem}
+      />
+
+      {/* Transfer Modal */}
+      <TransferModal
+        isOpen={isTransferModalOpen}
+        onClose={handleCloseTransferModal}
+        item={selectedTransferItem}
+        onTransfer={handleStockTransfer}
+        isLoading={transferMutation.isPending}
       />
     </div>
   );

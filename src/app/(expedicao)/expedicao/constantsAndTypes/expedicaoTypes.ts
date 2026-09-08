@@ -1,13 +1,18 @@
 export interface LeitorQR {
+  type: string;
   status: string;
-  value: {
-    C1: string;
-    C2: string;
-    C3: string;
-    C4: string;
-    C5: string;
-    C6: string;
-    F: string;
+  payload: {
+    parsed: {
+      C1: string;
+      C2: string;
+      C3: string;
+      C4: string;
+      C5: string;
+      C6: string;
+      F: string;
+    };
+    raw: string;
+    received: string;
   };
 }
 

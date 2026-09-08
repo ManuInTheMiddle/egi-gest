@@ -1,10 +1,15 @@
 import { useMutation } from "@tanstack/react-query";
 import axios from "axios";
 
+const DB_NAME = process.env.NEXT_PUBLIC_SAP_DBNAME;
+const DB_USER = process.env.NEXT_PUBLIC_SAP_USER;
+const DB_PASSWORD = process.env.NEXT_PUBLIC_SAP_PASSWORD;
+
+//BASE DE DADOS PRE LIVE
 const UTILIZADOR = {
-  CompanyDB: "Egiquimica_TST3",
-  Password: "egisap",
-  UserName: "manager",
+  CompanyDB: `${DB_NAME}`,
+  Password: `${DB_USER}`,
+  UserName: `${DB_PASSWORD}`,
 };
 
 const fazerLoginSap = () => {

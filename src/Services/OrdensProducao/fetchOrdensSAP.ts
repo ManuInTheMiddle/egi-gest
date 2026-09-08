@@ -25,6 +25,7 @@ interface ProductionOrderLine {
   WipAccount: string | null;
   ItemType: string;
   LineText: string | null;
+  U_FaseConsumo: string;
   AdditionalQuantity: number;
   ResourceAllocation: string | null;
   StartDate: string;
@@ -115,11 +116,11 @@ export const useFetchOrdensSAPData = (
     estado !== "boposClosed" &&
     estado !== "boposCancelled"
   ) {
-      estado = "boposPlanned"
+    estado = "boposPlanned";
   }
-  
+
   return useQuery({
-    queryKey: ["ordensProducaoSAP",estado,periodoData,pagina],
+    queryKey: ["ordensProducaoSAP", estado, periodoData, pagina],
     queryFn: async () => {
       const { data } = await axios.get(
         `http://egiquim-sap:50001/b1s/v1/ProductionOrders?$filter=ProductionOrderStatus eq '${estado}' and U_Tipo eq 'R' and CreationDate ge '${periodoData}'&$skip=${pagina}`,
@@ -131,6 +132,3 @@ export const useFetchOrdensSAPData = (
     refetchIntervalInBackground: true,
   });
 };
-
-
-

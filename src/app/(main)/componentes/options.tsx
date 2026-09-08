@@ -90,7 +90,7 @@ export default function Options() {
             <FlaskConical />
           </CardContent>
           <CardFooter>
-            <p>Formulação</p>
+            <p>Produção</p>
           </CardFooter>
         </Card>
       </a>
@@ -106,7 +106,7 @@ export default function Options() {
             <Factory />
           </CardContent>
           <CardFooter>
-            <p>Produção</p>
+            <p>Enchimento</p>
           </CardFooter>
         </Card>
       </a>

@@ -25,12 +25,14 @@ interface ProductionOrderLine {
   WipAccount: string | null;
   ItemType: string;
   LineText: string | null;
+  U_FaseConsumo: string;
   AdditionalQuantity: number;
   ResourceAllocation: string | null;
   StartDate: string;
   EndDate: string;
   StageID: number | null;
   RequiredDays: number;
+
   ItemName: string;
   SerialNumbers: any[];
   BatchNumbers: any[];
@@ -103,7 +105,7 @@ interface FetchOrdensSAPDataI {
 }
 
 const dataTeste = "2024-02-14";
-//const estadoTeste = "boposReleased";
+
 export const useFetchOrdensEnchimentoSAPData = (
   estado: FetchOrdensSAPDataI["estado"],
   periodoData: FetchOrdensSAPDataI["periodoData"] = dataTeste,
@@ -115,13 +117,13 @@ export const useFetchOrdensEnchimentoSAPData = (
     estado !== "boposClosed" &&
     estado !== "boposCancelled"
   ) {
-    estado = "boposPlanned"
+    estado = "boposReleased";
   }
   return useQuery({
-    queryKey: ["ordensProducaoEnchimentoSAP",periodoData,estado,pagina],
+    queryKey: ["ordensProducaoEnchimentoSAP", periodoData, estado, pagina],
     queryFn: async () => {
       const { data } = await axios.get(
-        `http://egiquim-sap:50001/b1s/v1/ProductionOrders?$filter=ProductionOrderStatus eq '${estado}' and U_Tipo eq 'E' and CreationDate ge '${periodoData}'&$skip=${pagina}`,
+        `http://egiquim-sap:50001/b1s/v1/ProductionOrders?$filter=ProductionOrderStatus eq '${estado}'and U_Tipo eq 'E' and CreationDate ge '${periodoData}'&$skip=${pagina}`,
         { withCredentials: true }
       );
       return data as ApiResponse;
@@ -130,3 +132,6 @@ export const useFetchOrdensEnchimentoSAPData = (
     refetchIntervalInBackground: true,
   });
 };
+
+//U_Tipo
+//`http://egiquim-sap:50001/b1s/v1/ProductionOrders?$filter=ProductionOrderStatus eq '${estado}' and CreationDate ge '${periodoData}'&$skip=${pagina}`

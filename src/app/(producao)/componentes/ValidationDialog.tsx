@@ -57,17 +57,18 @@ export const ValidationDialog: React.FC<ValidationDialogProps> = ({
             <div className="space-y-2">
               <p className="font-medium">Erro na validação:</p>
               <p className="text-sm">
-                {error?.message?.includes('timeout') 
-                  ? 'Timeout: Sistema SCADA não está respondendo. Tente novamente.'
-                  : error?.message || 'Erro desconhecido ao validar ordem.'
-                }
+                {error?.message?.includes("timeout")
+                  ? "Timeout: Sistema SCADA não está respondendo. Tente novamente."
+                  : error?.message || "Erro desconhecido ao validar ordem."}
               </p>
               <button
                 onClick={() => fetchOrdemProdSCADA.refetch()}
                 className="text-sm underline hover:no-underline"
                 disabled={fetchOrdemProdSCADA.isFetching}
               >
-                {fetchOrdemProdSCADA.isFetching ? 'Tentando...' : 'Tentar novamente'}
+                {fetchOrdemProdSCADA.isFetching
+                  ? "Tentando..."
+                  : "Tentar novamente"}
               </button>
             </div>
           </AlertDescription>
@@ -83,19 +84,22 @@ export const ValidationDialog: React.FC<ValidationDialogProps> = ({
             <CheckCircle2 className="h-4 w-4 text-green-600" />
             <AlertDescription className="text-green-800">
               Ordem encontrada no sistema SCADA com sucesso!
+              <div>{`Reator atual ${fetchOrdemProdSCADA.data[0].reator}`}</div>
             </AlertDescription>
           </Alert>
-          
+
           {/* Show changes */}
           <div className="space-y-2">
             {mudancaEstado && (
               <p className="text-sm">
-                <strong>Estado:</strong> Será alterado para {estadoOP.estadoSAPAtual}
+                <strong>Estado:</strong> Será alterado para{" "}
+                {estadoOP.estadoSAPAtual}
               </p>
             )}
             {mudancaReator && (
               <p className="text-sm">
-                <strong>Reator:</strong> Será alterado para Reator {reatorOP.idReatorAtual}
+                <strong>Reator:</strong> Será alterado para Reator{" "}
+                {reatorOP.idReatorAtual}
               </p>
             )}
             {!mudancaEstado && !mudancaReator && (
@@ -112,7 +116,7 @@ export const ValidationDialog: React.FC<ValidationDialogProps> = ({
     return (
       <div className="text-center py-4">
         <p className="text-sm text-gray-600">
-          {`Clique em "Validar" para verificar a ordem no sistema SCADA.`}
+          {`Nenhuma ordem no sistema SCADA.`}
         </p>
       </div>
     );
@@ -122,21 +126,22 @@ export const ValidationDialog: React.FC<ValidationDialogProps> = ({
     <AlertDialogContent className="max-w-2xl">
       <AlertDialogHeader>
         <AlertDialogTitle>
-          Validação da Ordem #{ordemProducao.AbsoluteEntry}
+          Validação da Ordem #{ordemProducao.DocumentNumber}
         </AlertDialogTitle>
         <AlertDialogDescription asChild>
-          <div className="text-left">
-            {renderValidationContent()}
-          </div>
+          <div className="text-left">{renderValidationContent()}</div>
         </AlertDialogDescription>
       </AlertDialogHeader>
       <AlertDialogFooter>
-        <AlertDialogCancel disabled={isLoading}>
-          Cancelar
-        </AlertDialogCancel>
-        <AlertDialogAction 
+        <AlertDialogCancel disabled={isLoading}>Cancelar</AlertDialogCancel>
+        <AlertDialogAction
           onClick={onConfirm}
-          disabled={isLoading || fetchOrdemProdSCADA.isError || !fetchOrdemProdSCADA.data}
+          disabled={
+            isLoading ||
+            fetchOrdemProdSCADA.isError ||
+            fetchOrdemProdSCADA.isFetching ||
+            fetchOrdemProdSCADA.isRefetching
+          }
           className="disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {isLoading ? (
@@ -144,6 +149,8 @@ export const ValidationDialog: React.FC<ValidationDialogProps> = ({
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
               Processando...
             </>
+          ) : !fetchOrdemProdSCADA.data ? (
+            "Criar"
           ) : (
             "Confirmar"
           )}

@@ -3,6 +3,7 @@ export interface BatchNumber {
   BatchNumber: string;
   Quantity: number;
   ItemCode: string;
+  ExpiryDate: string;
 }
 
 export interface DocumentLine {
@@ -10,6 +11,7 @@ export interface DocumentLine {
   BaseLine: number;
   BaseType: number;
   Quantity: number;
+  WarehouseCode?: string | null;
 }
 
 export interface DocumentLineBatch extends DocumentLine {

@@ -9,13 +9,14 @@ const Retorceder = () => {
 
   return (
     <div className="flex flex-row gap-4 items-center">
-      <Button size={"icon"} variant={"ghost"}>
-        <ArrowLeftCircle
-          onClick={() => {
-            //console.log("Voltar");
-            router.push("/producao");
-          }}
-        />
+      <Button
+        size={"icon"}
+        variant={"ghost"}
+        onClick={() => {
+          router.push("/producao");
+        }}
+      >
+        <ArrowLeftCircle />
       </Button>
       <h1 className="text-lg">Histórico de Produção</h1>
     </div>

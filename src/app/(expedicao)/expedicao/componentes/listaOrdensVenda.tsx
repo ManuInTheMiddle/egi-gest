@@ -1,6 +1,7 @@
 "use client";
 import React, { useState, useEffect, useCallback, useMemo } from "react";
 import SalesOrderCard from "./SalesOrderCard";
+import { useLoteModalFlow } from "../hooks/useModalLoteFlow";
 import QrcodeComponent from "@/components/ui/qrcodeComponent";
 import { Skeleton } from "@/components/ui/skeleton";
 import ZebraBrowserPrintWrapper from "zebra-browser-print-wrapper";
@@ -12,6 +13,7 @@ import {
   ClipboardList,
   Trash2,
   PlusCircle,
+  QrCode,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -43,7 +45,6 @@ import { useFetchOrdensVendaSAPData } from "@/Services/OrdensVenda/fetchOrdensVe
 import { useFetchQuantidadeArtigoLote } from "@/Services/LotesPorArtigo/fetchQuantidadeArtigoLote";
 import { useCriarGuiaRemessaSAP } from "@/Services/GuiasRemessa/criarGuiaRemessa";
 import { Document } from "@/Services/OrdensVenda/fetchOrdensVendaSAP";
-import { useFetchBatchManagedSAPData } from "@/Services/Inventario/fetchVerificarBatchNumber";
 
 //types
 import { LeitorQR } from "../constantsAndTypes/expedicaoTypes";
@@ -58,6 +59,150 @@ import { PrinterState } from "../constantsAndTypes/expedicaoTypes";
 import { EGIQUIMICA_LOGO_ZPL } from "../constantsAndTypes/expedicaoConstants";
 import { WEBSOCKET_URL } from "../constantsAndTypes/expedicaoConstants";
 import { PAGE_SIZE } from "../constantsAndTypes/expedicaoConstants";
+
+interface QuickQuantityModalProps {
+  loteModalState: any;
+  loteActions: any;
+  onConfirm: (quantity: number, matchedItem: any) => void;
+}
+
+const QuickQuantityModal: React.FC<QuickQuantityModalProps> = ({
+  loteModalState,
+  loteActions,
+  onConfirm,
+}) => {
+  const [localQuantity, setLocalQuantity] = useState(1);
+
+  // Update local quantity when modal opens
+  useEffect(() => {
+    if (loteModalState.quickModal.isOpen) {
+      setLocalQuantity(loteModalState.quickModal.quantity);
+    }
+  }, [loteModalState.quickModal.isOpen, loteModalState.quickModal.quantity]);
+
+  // Don't render if not open or no matched item
+  if (
+    !loteModalState.quickModal.isOpen ||
+    !loteModalState.quickModal.matchedItem
+  ) {
+    return null;
+  }
+
+  const { matchedItem, isSubmitting } = loteModalState.quickModal;
+
+  const handleConfirm = () => {
+    if (localQuantity > 0) {
+      onConfirm(localQuantity, matchedItem);
+    }
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter" && localQuantity > 0) {
+      handleConfirm();
+    } else if (e.key === "Escape") {
+      loteActions.closeQuickModal();
+    }
+  };
+
+  return (
+    <AlertDialog open={true} onOpenChange={() => loteActions.closeQuickModal()}>
+      <AlertDialogContent className="w-96">
+        <AlertDialogHeader>
+          <AlertDialogTitle className="flex items-center gap-2">
+            🏷️ Lote Digitalizado
+          </AlertDialogTitle>
+          <AlertDialogDescription>
+            <div className="space-y-4">
+              {/* Informação do item */}
+              <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
+                <div className="space-y-2 text-sm">
+                  <div className="flex justify-between">
+                    <span className="font-medium text-gray-600">Item:</span>
+                    <span className="font-bold">{matchedItem.itemCode}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="font-medium text-gray-600">
+                      Descrição:
+                    </span>
+                    <span className="text-right text-xs">
+                      {matchedItem.itemName}
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="font-medium text-gray-600">Lote:</span>
+                    <span className="font-bold text-blue-600">
+                      {matchedItem.batchNumber}
+                    </span>
+                  </div>
+                  {matchedItem.expiryDate && (
+                    <div className="flex justify-between">
+                      <span className="font-medium text-gray-600">
+                        Validade:
+                      </span>
+                      <span>{matchedItem.expiryDate}</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Input de quantidade */}
+              <div className="space-y-3">
+                <Label
+                  htmlFor="quick-quantity"
+                  className="text-base font-medium"
+                >
+                  Quantidade:
+                </Label>
+                <Input
+                  id="quick-quantity"
+                  type="number"
+                  min="1"
+                  step="1"
+                  value={localQuantity}
+                  onChange={(e) => setLocalQuantity(Number(e.target.value))}
+                  onKeyDown={handleKeyDown}
+                  className="text-2xl font-bold text-center h-12"
+                  autoFocus
+                  disabled={isSubmitting}
+                />
+              </div>
+
+              {/* Feedback visual */}
+              <div className="text-center text-sm text-gray-500">
+                Pressione{" "}
+                <kbd className="px-1 py-0.5 bg-gray-100 rounded">Enter</kbd>{" "}
+                para confirmar
+              </div>
+            </div>
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+
+        <AlertDialogFooter className="flex gap-2">
+          <AlertDialogCancel
+            onClick={() => loteActions.closeQuickModal()}
+            disabled={isSubmitting}
+          >
+            Cancelar
+          </AlertDialogCancel>
+          <AlertDialogAction
+            onClick={handleConfirm}
+            disabled={localQuantity <= 0 || isSubmitting}
+            className="min-w-[100px]"
+          >
+            {isSubmitting ? (
+              <div className="flex items-center gap-2">
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                A processar...
+              </div>
+            ) : (
+              "Confirmar"
+            )}
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+  );
+};
 
 // Utility functions
 const isJSON = (str: string): boolean => {
@@ -117,73 +262,6 @@ const usePagination = () => {
     handlePaginaSeguinte,
     handlePaginaAnterior,
     handlePrimeiraPagina,
-  };
-};
-
-const useLotesState = () => {
-  const [lotes, setLotes] = useState<BatchNumbersInterface[]>([]);
-  const [lote, setLote] = useState("");
-  const [selectLotes, setSelectLotes] = useState<SelectLotesInterface[]>([]);
-
-  const addLote = useCallback((batchNumber: string, itemCode: string) => {
-    // Add validation
-    if (!batchNumber || !itemCode) return;
-
-    setLotes((prev) =>
-      produce(prev, (draft) => {
-        if (
-          draft.findIndex((item) => item.BatchNumber === batchNumber) === -1
-        ) {
-          draft.push({
-            BatchNumber: batchNumber,
-            Quantity: 0,
-            ItemCode: itemCode,
-          });
-        }
-      })
-    );
-  }, []);
-
-  const updateLoteQuantity = useCallback(
-    (batchNumber: string, quantity: number) => {
-      // Add validation to prevent negative quantities
-      if (quantity < 0) return;
-
-      setLotes((prev) =>
-        produce(prev, (draft) => {
-          const index = draft.findIndex(
-            (item) => item.BatchNumber === batchNumber
-          );
-          if (index !== -1) {
-            draft[index].Quantity = quantity;
-          }
-        })
-      );
-    },
-    []
-  );
-
-  // Keep other functions the same
-  const removeLote = useCallback((batchNumber: string) => {
-    setLotes((prev) => prev.filter((item) => item.BatchNumber !== batchNumber));
-  }, []);
-
-  const clearLotes = useCallback(() => {
-    setLotes([]);
-    setLote("");
-    setSelectLotes([]);
-  }, []);
-
-  return {
-    lotes,
-    lote,
-    setLote,
-    selectLotes,
-    setSelectLotes,
-    addLote,
-    updateLoteQuantity,
-    removeLote,
-    clearLotes,
   };
 };
 
@@ -321,15 +399,12 @@ const ListaOrdensVenda: React.FC = () => {
   const { numeroPagina, handlePaginaSeguinte, handlePaginaAnterior } =
     usePagination();
   const { imprimirEtiqueta, isPrinting, printerError } = usePrinter();
+
   const {
-    lotes,
-    lote,
-    setLote,
-    addLote,
-    updateLoteQuantity,
-    removeLote,
-    clearLotes,
-  } = useLotesState();
+    state: loteModalState,
+    actions: loteActions,
+    computed: loteComputed,
+  } = useLoteModalFlow();
   const {
     documentLines,
     documentLinesBatchN,
@@ -342,10 +417,6 @@ const ListaOrdensVenda: React.FC = () => {
   const [cardCode, setCardCode] = useState("");
   const [docDate, setDocDate] = useState("");
   const [body, setBody] = useState<BodyInterface>();
-  const [abrirModalLote, setAbrirModalLote] = useState(false);
-  const [validouSelecaoLote, setValidouSelecaoLote] = useState(false);
-  const [artigo, setArtigo] = useState("");
-  const [lineNumLoteButton, setLineNum] = useState<number>();
   const [validouValores, setValidouValores] = useState(false);
   const [pickagemOrdemVenda, setPickagemOrdemProducao] = useState(0);
   const [abrirModalPickagem, setAbrirModalPickagem] = useState(false);
@@ -357,10 +428,301 @@ const ListaOrdensVenda: React.FC = () => {
     format(new Date(datahora.getFullYear(), 0, 1), "yyyy-MM-dd"),
     numeroPagina
   );
-  const quantidadePorLote = useFetchQuantidadeArtigoLote(artigo);
-  const artigoGeridoPorLotesSAP = useFetchBatchManagedSAPData(artigo);
+  const quantidadePorLote = useFetchQuantidadeArtigoLote(
+    loteModalState.currentItem.artigo || ""
+  );
 
   // WebSocket
+  // Minimal fix to get your current order scanning working:
+  const determineQRType = (qrData: any): "order" | "lote" | "unknown" => {
+    const typeField = qrData.payload?.parsed?.F;
+
+    if (typeField === "ordemvenda") {
+      return "order";
+    }
+
+    // ADD "MateriaPrima" to this list
+    if (
+      typeField === "lote" ||
+      typeField === "batch" ||
+      typeField === "item" ||
+      typeField === "produto" ||
+      typeField === "MateriaPrima" // ADD THIS
+    ) {
+      return "lote";
+    }
+
+    return "unknown";
+  };
+
+  const parseOrderQR = (qrData: any): number | null => {
+    try {
+      // Your structure: payload.parsed.C2 contains the order number
+      const orderNumber = Number(qrData.payload.parsed.C2);
+
+      if (!qrData.payload?.parsed?.C2 || isNaN(orderNumber)) {
+        return null;
+      }
+
+      return orderNumber;
+    } catch (error) {
+      console.error("Error parsing order QR:", error);
+      return null;
+    }
+  };
+
+  const findMatchingOrderLine = useCallback(
+    (qrData: any, orderLines: any[]) => {
+      if (!qrData || !orderLines || orderLines.length === 0) {
+        return null;
+      }
+
+      // Try to match by ItemCode first (most reliable)
+      let matchedLine = orderLines.find(
+        (line) => line.ItemCode === qrData.itemCode
+      );
+
+      // If no match by ItemCode, try by ItemName/Description
+      if (!matchedLine && qrData.itemName) {
+        matchedLine = orderLines.find(
+          (line) =>
+            line.ItemDescription === qrData.itemName ||
+            line.ItemDescription?.toLowerCase().includes(
+              qrData.itemName.toLowerCase()
+            )
+        );
+      }
+
+      // REMOVED: Additional validation for remaining quantity
+      // if (matchedLine && matchedLine.RemainingOpenQuantity <= 0) {
+      //   console.warn("⚠️ Item found but no remaining quantity:", matchedLine);
+      //   return null;
+      // }
+
+      return matchedLine;
+    },
+    []
+  );
+
+  const parseLoteQR = (qrData: any) => {
+    try {
+      const parsed = qrData.payload?.parsed;
+
+      if (!parsed) {
+        return null;
+      }
+
+      const parseValidity = (validityField: string) => {
+        if (validityField === "NAvalidade" || validityField === "NA") {
+          return ""; // No validity date
+        }
+        // Add logic to parse actual date if it's in a different format
+        return validityField;
+      };
+
+      // UPDATE: Map to your new structure
+      const itemCode = parsed.C1; // "214/5"
+      const itemName = parsed.C2; // "H2 DET-M Lava Louça Manual Limão - 5 Lts"
+      const optionalField = parsed.C3; // "NA"
+      const batchNumber = parsed.C4; // "214/525006069"
+      const validity = parsed.C5; // "NAvalidade"
+
+      // Validate required fields
+      if (!itemCode || !batchNumber) {
+        console.error("Missing required lote fields in QR:", parsed);
+        return null;
+      }
+
+      return {
+        itemCode: itemCode,
+        itemName: itemName,
+        batchNumber: batchNumber,
+        expiryDate: validity === "NAvalidade" ? "" : validity, // Handle your validity format
+        manufacturingDate: "", // Not provided in your structure
+        quantity: 0, // Not provided in your structure
+        optionalField: optionalField,
+      };
+    } catch (error) {
+      console.error("Error parsing lote QR:", error);
+      return null;
+    }
+  };
+
+  const handleOrderQRScan = useCallback(
+    (qrData: any) => {
+      const orderNumber = parseOrderQR(qrData);
+
+      if (!orderNumber) {
+        console.error("Failed to parse order number from QR");
+        return;
+      }
+
+      console.log("📦 Order QR scanned:", orderNumber);
+
+      // Your existing order QR logic (this was already working)
+      setPickagemOrdemProducao(orderNumber);
+
+      const ordemEncontrada = ordensVendaSAP.data?.value.find(
+        (ordemVenda) => ordemVenda.DocEntry === orderNumber
+      );
+
+      if (ordemEncontrada) {
+        setAbrirModalPickagem(true);
+        setCardCode(ordemEncontrada.CardCode);
+        setDocDate(format(datahora.toISOString(), "yyyyMMdd"));
+        console.log("✅ Order found and modal opened");
+      } else {
+        console.error("❌ Order not found:", orderNumber);
+      }
+    },
+    [ordensVendaSAP.data, datahora]
+  );
+
+  const handleLoteQRScan = useCallback(
+    (qrData: any) => {
+      console.log("🏷️ Lote QR scan attempt:", qrData);
+
+      const loteData = parseLoteQR(qrData);
+
+      if (!loteData) {
+        // If we're in manual QR mode, show error
+        if (loteModalState.qrScanState.isScanning) {
+          loteActions.handleQRScanError(
+            "Código QR de lote inválido: campos obrigatórios em falta"
+          );
+        }
+        return;
+      }
+
+      console.log("✅ Lote QR parsed successfully:", loteData);
+
+      // Check if we have an active order
+      const currentOrder = ordensVendaSAP.data?.value.find(
+        (order) => order.DocEntry === pickagemOrdemVenda
+      );
+
+      if (!currentOrder?.DocumentLines) {
+        if (loteModalState.qrScanState.isScanning) {
+          loteActions.handleQRScanError(
+            "Nenhuma ordem ativa para validar. Por favor, selecione uma ordem primeiro."
+          );
+        }
+        return;
+      }
+
+      // NEW: Try auto-detection if not in manual QR mode
+      if (!loteModalState.qrScanState.isScanning) {
+        const matchedLine = findMatchingOrderLine(
+          loteData,
+          currentOrder.DocumentLines
+        );
+
+        if (matchedLine) {
+          console.log("🎯 Auto-match encontrada:", matchedLine);
+
+          // Open quick modal
+          loteActions.openQuickModal({
+            itemCode: matchedLine.ItemCode,
+            itemName: matchedLine.ItemDescription,
+            lineNum: matchedLine.LineNum,
+            batchNumber: loteData.batchNumber,
+            expiryDate: loteData.expiryDate,
+            manufacturingDate: loteData.manufacturingDate,
+          });
+          return;
+        } else {
+          console.warn(
+            "❌ Item não encontrado na ordem atual:",
+            loteData.itemCode
+          );
+          // Could show a toast notification here
+          return;
+        }
+      }
+
+      // Original manual QR logic (when in QR scanning mode)
+      loteActions.handleQRScanSuccess(loteData);
+      loteActions.validateQRAgainstOrder(currentOrder.DocumentLines);
+    },
+    [
+      loteActions,
+      ordensVendaSAP.data,
+      pickagemOrdemVenda,
+      findMatchingOrderLine,
+      loteModalState.qrScanState.isScanning,
+    ]
+  );
+
+  const handleManualOrderSelection = useCallback(
+    (ordemVenda) => {
+      console.log("📦 Manual order selection:", ordemVenda.DocEntry);
+
+      // Set the order for processing (same as QR scan)
+      setPickagemOrdemProducao(ordemVenda.DocEntry);
+
+      // Set the card code and date
+      setCardCode(ordemVenda.CardCode);
+      setDocDate(format(datahora.toISOString(), "yyyyMMdd"));
+
+      // Open the modal
+      setAbrirModalPickagem(true);
+
+      console.log("✅ Order selected manually and modal opened");
+    },
+    [datahora]
+  );
+
+  const handleQuickModalConfirm = useCallback(
+    (quantity: number, matchedItem: any) => {
+      console.log("🚀 Quick confirm:", { quantity, matchedItem });
+
+      // Set submitting state
+      loteActions.setQuickSubmitting(true);
+
+      try {
+        // Create batch data in the expected format
+        const lotesForDocumentLine = [
+          {
+            BatchNumber: matchedItem.batchNumber,
+            Quantity: quantity,
+            ItemCode: matchedItem.itemCode,
+          },
+        ];
+
+        // Find current sales order
+        const currentSalesOrder = ordensVendaSAP.data?.value.find(
+          (ordemVenda) => ordemVenda.DocEntry === pickagemOrdemVenda
+        );
+
+        if (currentSalesOrder) {
+          // Add to document lines
+          addDocumentLineBatch(
+            currentSalesOrder.DocEntry,
+            matchedItem.lineNum,
+            lotesForDocumentLine
+          );
+
+          console.log(
+            "✅ Lote adicionado rapidamente:",
+            lotesForDocumentLine[0]
+          );
+
+          // Success feedback
+          setTimeout(() => {
+            loteActions.closeQuickModal();
+          }, 500);
+        } else {
+          console.error("❌ Sales order not found");
+          loteActions.closeQuickModal();
+        }
+      } catch (error) {
+        console.error("❌ Error adding quick lote:", error);
+        loteActions.closeQuickModal();
+      }
+    },
+    [loteActions, ordensVendaSAP.data, pickagemOrdemVenda, addDocumentLineBatch]
+  );
+
   const { lastMessage } = useWebSocket(WEBSOCKET_URL, {
     onOpen: () => console.log("WebSocket connected"),
     onError: (error) => console.error("WebSocket error:", error),
@@ -368,31 +730,68 @@ const ListaOrdensVenda: React.FC = () => {
       if (!isJSON(event.data)) return;
 
       try {
-        const eventdataJSON: LeitorQR = JSON.parse(event.data);
-        const numeroParseado = Number(eventdataJSON.value.C2);
+        const eventdataJSON = JSON.parse(event.data);
 
-        // Add validation
-        if (isNaN(numeroParseado)) {
-          console.error(
-            "Invalid order number received:",
-            eventdataJSON.value.C2
-          );
+        // Only process QR data messages, ignore status messages
+        if (eventdataJSON.type !== "qr_data") {
           return;
         }
 
-        setPickagemOrdemProducao(numeroParseado);
+        // Check if the scan was successful
+        if (eventdataJSON.status !== "ok") {
+          console.error("QR scan failed:", eventdataJSON.status);
+          return;
+        }
 
-        const ordemEncontrada = ordensVendaSAP.data?.value.find(
-          (ordemVenda) => ordemVenda.DocEntry === numeroParseado
+        // Debug log
+        console.log("📡 QR Data received:", eventdataJSON);
+
+        // Determine what type of QR code this is
+        const qrType = determineQRType(eventdataJSON);
+        console.log(
+          "🔍 QR Type detected:",
+          qrType,
+          "F field:",
+          eventdataJSON.payload?.parsed?.F
         );
 
-        if (ordemEncontrada) {
-          setAbrirModalPickagem(true);
-          setCardCode(ordemEncontrada.CardCode);
-          setDocDate(format(datahora.toISOString(), "yyyyMMdd"));
+        // UPDATED ROUTING LOGIC
+        if (qrType === "lote") {
+          // Always try to handle lote QR codes
+          // The handleLoteQRScan function will decide whether to:
+          // 1. Use auto-detection (if order is active and not in manual QR mode)
+          // 2. Use manual QR flow (if in QR scanning mode)
+          // 3. Ignore (if no active order)
+          handleLoteQRScan(eventdataJSON);
+        } else if (qrType === "order") {
+          // Handle order QR only if not in lote scanning mode
+          if (!loteModalState.qrScanState.isScanning) {
+            handleOrderQRScan(eventdataJSON);
+          } else {
+            loteActions.handleQRScanError(
+              "Esperado código QR de lote, mas recebido código QR de ordem. Por favor, digitalize um código QR de lote."
+            );
+          }
+        } else {
+          // Unknown QR type
+          if (loteModalState.qrScanState.isScanning) {
+            loteActions.handleQRScanError(
+              `Tipo de código QR não reconhecido: ${eventdataJSON.payload?.parsed?.F}. Esperado um código QR de lote.`
+            );
+          } else {
+            console.error(
+              "❓ Unrecognized QR code type:",
+              eventdataJSON.payload?.parsed?.F
+            );
+          }
         }
       } catch (error) {
-        console.error("Error parsing WebSocket message:", error);
+        console.error("💥 Error parsing WebSocket message:", error);
+
+        // If we're in lote scanning mode, show error to user
+        if (loteModalState.qrScanState.isScanning) {
+          loteActions.handleQRScanError("Falha ao analisar dados do código QR");
+        }
       }
     },
     share: true,
@@ -412,6 +811,27 @@ const ListaOrdensVenda: React.FC = () => {
 
   // Add this effect to auto-clear printer errors:
   useEffect(() => {
+    if (
+      loteModalState.inputMethod === "manual" &&
+      loteModalState.currentItem.artigo &&
+      loteModalState.loadingStates.fetchingLotes
+    ) {
+      // Only need to refetch one API now
+      quantidadePorLote.refetch().then(() => {
+        if (quantidadePorLote.data?.value) {
+          loteActions.handleLotesFetchSuccess(quantidadePorLote.data.value);
+        }
+      });
+    }
+  }, [
+    loteModalState.inputMethod,
+    loteModalState.currentItem.artigo,
+    loteModalState.loadingStates.fetchingLotes,
+    quantidadePorLote,
+    loteActions,
+  ]);
+
+  useEffect(() => {
     if (printerError) {
       const timer = setTimeout(() => {
         // Note: You'd need to expose a clearError function from usePrinter hook
@@ -430,34 +850,62 @@ const ListaOrdensVenda: React.FC = () => {
     [ordensVendaSAP.data?.value, pickagemOrdemVenda]
   );
 
-  const isBatchManaged = useMemo(
-    () => artigoGeridoPorLotesSAP.data?.ManageBatchNumbers === "tYES",
-    [artigoGeridoPorLotesSAP.data?.ManageBatchNumbers]
-  );
+  const isBatchManaged = useMemo(() => {
+    // Use optional chaining to safely access the first item
+    const firstItem = quantidadePorLote.data?.value?.[0];
 
-  const hasStock = useMemo(
-    () => (quantidadePorLote.data?.value?.length ?? 0) > 0,
-    [quantidadePorLote.data?.value?.length]
-  );
+    // Check if the first item exists and has IsBatchManaged property
+    return firstItem?.IsBatchManaged === "Y";
+  }, [quantidadePorLote.data?.value]);
+
+  const hasStock = useMemo(() => {
+    // Check quantidadePorLote API for available stock
+    const quantidadeData = quantidadePorLote.data?.value;
+    if (Array.isArray(quantidadeData) && quantidadeData.length > 0) {
+      // Check if any items have quantity > 0
+      return quantidadeData.some(
+        (item) => typeof item.Quantity === "number" && item.Quantity > 0
+      );
+    }
+    return false;
+  }, [quantidadePorLote.data?.value]);
 
   // Event handlers
   const handleValidateSelection = useCallback(() => {
-    if (!currentSalesOrder || lineNumLoteButton === undefined) return;
+    const currentSalesOrder = ordensVendaSAP.data?.value.find(
+      (ordemVenda) => ordemVenda.DocEntry === pickagemOrdemVenda
+    );
 
-    if (isBatchManaged && lotes.length > 0) {
+    if (!currentSalesOrder || !loteModalState.currentItem.lineNum) return;
+
+    // Use the lotes from the new state structure
+    if (isBatchManaged && loteModalState.selection.selectedLotes.length > 0) {
+      // Convert to your existing format
+      const lotesForDocumentLine = loteModalState.selection.selectedLotes.map(
+        (lote) => ({
+          BatchNumber: lote.batchNumber,
+          Quantity: lote.quantity,
+          ItemCode: lote.itemCode,
+        })
+      );
+
       addDocumentLineBatch(
         currentSalesOrder.DocEntry,
-        lineNumLoteButton,
-        lotes
+        loteModalState.currentItem.lineNum,
+        lotesForDocumentLine
       );
     }
-    setValidouSelecaoLote(true);
+
+    loteActions.validateSelection();
   }, [
     currentSalesOrder,
-    lineNumLoteButton,
+    loteModalState.currentItem.lineNum,
+    loteModalState.selection.selectedLotes,
     isBatchManaged,
     addDocumentLineBatch,
-    lotes,
+    loteActions,
+    ordensVendaSAP.data?.value,
+    pickagemOrdemVenda,
   ]);
 
   const handleValidateValues = useCallback(() => {
@@ -474,6 +922,13 @@ const ListaOrdensVenda: React.FC = () => {
     });
     setValidouValores(true);
   }, [documentLinesBatchN, documentLines, cardCode, docDate]);
+
+  const handleLoteButtonClick = useCallback(
+    (itemCode: string, lineNum: number) => {
+      loteActions.openManualMode(itemCode, lineNum);
+    },
+    [loteActions]
+  );
 
   const generateZPLLabel = useCallback(() => {
     if (!currentSalesOrder || !body) return "";
@@ -515,11 +970,10 @@ const ListaOrdensVenda: React.FC = () => {
   ]);
 
   const handleCloseModal = useCallback(() => {
-    clearLotes();
+    loteActions.resetModal(); // Instead of clearLotes()
     setAbrirModalPickagem(false);
     setValidouValores(false);
-    setValidouSelecaoLote(false);
-  }, [clearLotes]);
+  }, [loteActions]);
 
   // Loading and error states
   if (ordensVendaSAP.isError) {
@@ -562,11 +1016,25 @@ const ListaOrdensVenda: React.FC = () => {
               className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4"
             >
               {ordensVendaSAP.data?.value.map((ordemVenda, index) => (
-                <SalesOrderCard
+                <li
                   key={`${ordemVenda.DocEntry}-${index}`}
-                  ordemVenda={ordemVenda}
-                  index={index}
-                />
+                  className="relative"
+                >
+                  <SalesOrderCard ordemVenda={ordemVenda} index={index} />
+                  {/* Manual selection button */}
+                  <div className="absolute top-2 right-2">
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => handleManualOrderSelection(ordemVenda)}
+                      className="bg-white/90 hover:bg-white shadow-sm"
+                      title={`Abrir ordem ${ordemVenda.DocEntry} manualmente`}
+                    >
+                      <ClipboardList className="h-4 w-4 mr-1" />
+                      Abrir
+                    </Button>
+                  </div>
+                </li>
               ))}
             </ul>
 
@@ -616,19 +1084,43 @@ const ListaOrdensVenda: React.FC = () => {
                                         <span className="font-medium text-gray-900 dark:text-white">
                                           Lote:
                                         </span>
+
+                                        {/* Manual Selection Button */}
                                         <Button
                                           size="icon"
-                                          disabled={false}
-                                          onClick={() => {
-                                            setLineNum(linhaVenda.LineNum);
-                                            setArtigo(linhaVenda.ItemCode);
-                                            quantidadePorLote.refetch();
-                                            artigoGeridoPorLotesSAP.refetch();
-                                            setAbrirModalLote(true);
-                                          }}
-                                          aria-label={`Selecionar lote para ${linhaVenda.ItemCode}`}
+                                          variant="outline"
+                                          disabled={loteComputed.isLoading}
+                                          onClick={() =>
+                                            handleLoteButtonClick(
+                                              linhaVenda.ItemCode,
+                                              linhaVenda.LineNum
+                                            )
+                                          }
+                                          aria-label={`Seleção manual de lotes para ${linhaVenda.ItemCode}`}
+                                          title="Seleção manual de lotes"
                                         >
-                                          <ClipboardList />
+                                          {loteComputed.isLoading &&
+                                          loteModalState.currentItem.lineNum ===
+                                            linhaVenda.LineNum ? (
+                                            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-gray-900"></div>
+                                          ) : (
+                                            <ClipboardList />
+                                          )}
+                                        </Button>
+
+                                        {/* QR Scan Button */}
+                                        <Button
+                                          size="icon"
+                                          variant="outline"
+                                          onClick={() =>
+                                            loteActions.openQRMode(
+                                              linhaVenda.LineNum
+                                            )
+                                          }
+                                          aria-label={`Scanner QR de lotes para ${linhaVenda.ItemCode}`}
+                                          title="Scanner QR de lotes"
+                                        >
+                                          <QrCode />
                                         </Button>
                                       </div>
                                     </dd>
@@ -691,150 +1183,373 @@ const ListaOrdensVenda: React.FC = () => {
             </AlertDialog>
 
             {/* Batch Selection Modal */}
-            <AlertDialog open={abrirModalLote} onOpenChange={setAbrirModalLote}>
+            {/* Replace your existing Batch Selection Modal with this: */}
+            <AlertDialog
+              open={loteModalState.isOpen}
+              onOpenChange={(open) => !open && loteActions.closeModal()}
+            >
               <AlertDialogContent className="w-4/5 max-h-[90vh] overflow-y-auto">
                 <AlertDialogHeader>
                   <AlertDialogTitle>
-                    {`Seleção dos lotes (${artigo})`}
-                    {quantidadePorLote.isLoading ||
-                    quantidadePorLote.isFetching ||
-                    quantidadePorLote.isRefetching
-                      ? " A carregar..."
-                      : !hasStock
-                      ? " Sem stock"
-                      : null}
+                    {loteModalState.inputMethod === "manual"
+                      ? `Seleção Manual de Lotes (${
+                          loteModalState.currentItem.artigo || "A carregar..."
+                        })`
+                      : `Scanner QR de Lotes`}
+                    {loteComputed.isLoading && " - A carregar..."}
                   </AlertDialogTitle>
 
-                  {quantidadePorLote.isLoading ||
-                  quantidadePorLote.isFetching ||
-                  quantidadePorLote.isRefetching ? (
-                    <div>A carregar...</div>
-                  ) : hasStock ? (
-                    <AlertDialogDescription>
-                      {quantidadePorLote.data?.value && isBatchManaged && (
-                        <div className="flex flex-row items-center">
-                          <Select onValueChange={setLote}>
-                            <SelectTrigger className="w-[180px] mb-1">
-                              <SelectValue placeholder="Lote" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {quantidadePorLote.data.value.map(
-                                (itemLote) =>
-                                  itemLote.BatchNum && (
+                  <AlertDialogDescription>
+                    {/* QR Scanning Interface */}
+                    {loteComputed.showQRInterface && (
+                      <div className="space-y-4">
+                        {loteModalState.qrScanState.isScanning ? (
+                          <div className="text-center p-8 border-2 border-dashed border-blue-300 rounded-lg bg-blue-50">
+                            <div className="text-blue-600 text-lg font-medium mb-2">
+                              📱 Digitalize o código QR para informações do
+                              lote...
+                            </div>
+                            <div className="text-blue-500 text-sm mb-4">
+                              Aponte o scanner para um código QR de lote
+                            </div>
+                            <Button
+                              variant="outline"
+                              onClick={() => loteActions.closeModal()}
+                              className="mt-4"
+                            >
+                              Cancelar Digitalização
+                            </Button>
+                          </div>
+                        ) : loteModalState.qrScanState.scannedData ? (
+                          <div
+                            className={`p-4 border rounded-lg ${
+                              loteModalState.qrScanState.validationResult ===
+                              "valid"
+                                ? "bg-green-50 border-green-200"
+                                : "bg-red-50 border-red-200"
+                            }`}
+                          >
+                            <h4
+                              className={`font-medium ${
+                                loteModalState.qrScanState.validationResult ===
+                                "valid"
+                                  ? "text-green-800"
+                                  : "text-red-800"
+                              }`}
+                            >
+                              QR Digitalizado{" "}
+                              {loteModalState.qrScanState.validationResult ===
+                              "valid"
+                                ? "com Sucesso!"
+                                : "com Problemas"}
+                            </h4>
+                            <div className="mt-2 space-y-1">
+                              <p>
+                                <strong>Item:</strong>{" "}
+                                {
+                                  loteModalState.qrScanState.scannedData
+                                    .itemCode
+                                }
+                              </p>
+                              <p>
+                                <strong>Batch:</strong>{" "}
+                                {
+                                  loteModalState.qrScanState.scannedData
+                                    .batchNumber
+                                }
+                              </p>
+                              {loteModalState.qrScanState.scannedData
+                                .expiryDate && (
+                                <p>
+                                  <strong>Expiry:</strong>{" "}
+                                  {
+                                    loteModalState.qrScanState.scannedData
+                                      .expiryDate
+                                  }
+                                </p>
+                              )}
+                            </div>
+
+                            {loteModalState.qrScanState.validationResult ===
+                            "valid" ? (
+                              <div className="text-green-600 mt-2 flex items-center">
+                                <span className="mr-2">✓</span>
+                                Item encontrado na ordem atual - pronto para
+                                inserir quantidade
+                              </div>
+                            ) : loteModalState.qrScanState.validationResult ===
+                              "not_found" ? (
+                              <div className="text-red-600 mt-2 flex items-center">
+                                <span className="mr-2">❌</span>
+                                {loteModalState.qrScanState.errorMessage}
+                              </div>
+                            ) : null}
+
+                            {/* Retry button for failed scans */}
+                            {loteModalState.qrScanState.validationResult !==
+                              "valid" && (
+                              <Button
+                                onClick={loteActions.startQRScan}
+                                className="mt-3 w-full"
+                                variant="outline"
+                              >
+                                Tentar Outro Código QR
+                              </Button>
+                            )}
+                          </div>
+                        ) : (
+                          <div className="text-center p-6">
+                            <QrCode className="mx-auto h-16 w-16 text-gray-400 mb-4" />
+                            <h3 className="text-lg font-medium text-gray-900 mb-2">
+                              Pronto para Digitalizar Código QR
+                            </h3>
+                            <p className="text-gray-500 mb-4">
+                              Clique no botão abaixo para começar a digitalizar
+                              um código QR de lote
+                            </p>
+                            <Button
+                              onClick={loteActions.startQRScan}
+                              className="w-full"
+                            >
+                              <QrCode className="mr-2 h-4 w-4" />
+                              Iniciar Digitalização QR
+                            </Button>
+                          </div>
+                        )}
+
+                        {/* Show error messages */}
+                        {loteModalState.qrScanState.errorMessage &&
+                          loteModalState.qrScanState.validationResult !==
+                            "not_found" && (
+                            <div className="p-4 bg-red-50 border border-red-200 rounded-lg text-red-700">
+                              <strong>Erro:</strong>
+                              {loteModalState.qrScanState.errorMessage}
+                            </div>
+                          )}
+                      </div>
+                    )}
+                  </AlertDialogDescription>
+                  {/* Your existing Manual Selection Interface comes after this... */}
+                  <AlertDialogDescription>
+                    {/* Manual Selection Interface */}
+                    {loteComputed.showManualSelection && (
+                      <div className="space-y-4">
+                        <div className="p-4 bg-gray-50 rounded-lg border">
+                          <h4 className="font-medium text-gray-900 mb-3">
+                            Lotes Disponíveis
+                          </h4>
+                          <div className="flex flex-row items-center gap-2">
+                            <Select
+                              onValueChange={(value) => {
+                                // Find the selected lote data
+                                const selectedLote =
+                                  loteModalState.currentItem.availableLotes?.find(
+                                    (lote) => lote.BatchNum === value
+                                  );
+                                if (selectedLote) {
+                                  loteActions.addLote(
+                                    selectedLote.BatchNum,
+                                    selectedLote.ItemCode,
+                                    0,
+                                    "manual"
+                                  );
+                                }
+                              }}
+                            >
+                              <SelectTrigger className="w-[250px]">
+                                <SelectValue placeholder="Selecione um lote da lista" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {loteModalState.currentItem.availableLotes?.map(
+                                  (itemLote) => (
                                     <SelectItem
-                                      key={`${itemLote.ItemCode}-${itemLote.BatchNum}-${itemLote.Quantity}`}
+                                      key={itemLote.BatchNum}
                                       value={itemLote.BatchNum}
                                     >
-                                      {`${itemLote.BatchNum} Qtd:(${itemLote.Quantity})`}
+                                      {`${itemLote.BatchNum} (Disponivel: ${itemLote.Quantity})`}
                                     </SelectItem>
                                   )
-                              )}
-                            </SelectContent>
-                          </Select>
-                          <Button
-                            size="icon"
-                            variant="ghost"
-                            onClick={() => addLote(lote, artigo)}
-                          >
-                            <PlusCircle />
-                          </Button>
-                          {isBatchManaged && (
-                            <div>Este item é gerido por lotes</div>
-                          )}
-                        </div>
-                      )}
-
-                      <div className="space-y-3 max-h-[339px] overflow-y-scroll sm:space-y-2 rounded-lg border border-gray-100 bg-gray-50 p-6 dark:border-gray-700 dark:bg-gray-800 mb-6 md:mb-8">
-                        {lotes.map((loteItem) => (
-                          <div
-                            key={`${loteItem.BatchNumber}-${loteItem.Quantity}`}
-                            className="flex items-center gap-2 p-2 bg-white rounded border"
-                          >
-                            <span className="font-medium">Lote:</span>
-                            <span className="text-gray-600">
-                              {loteItem.BatchNumber}
-                            </span>
-                            <span className="font-medium ml-4">
-                              Quantidade:
-                            </span>
-                            <Input
-                              className="w-[100px]"
-                              type="number"
-                              min="0"
-                              defaultValue={loteItem.Quantity}
-                              onChange={(e) =>
-                                updateLoteQuantity(
-                                  loteItem.BatchNumber,
-                                  Number(e.target.value)
-                                )
-                              }
-                            />
+                                )}
+                              </SelectContent>
+                            </Select>
                             <Button
                               size="icon"
                               variant="ghost"
-                              onClick={() => removeLote(loteItem.BatchNumber)}
-                              aria-label={`Remover lote ${loteItem.BatchNumber}`}
+                              onClick={() => {
+                                // Refresh the lotes
+                                if (
+                                  loteModalState.currentItem.artigo &&
+                                  loteModalState.currentItem.lineNum
+                                ) {
+                                  loteActions.openManualMode(
+                                    loteModalState.currentItem.artigo,
+                                    loteModalState.currentItem.lineNum
+                                  );
+                                }
+                              }}
+                              title="Atualizar lotes"
                             >
-                              <Trash2 />
+                              <PlusCircle />
                             </Button>
                           </div>
-                        ))}
 
-                        {!isBatchManaged && (
-                          <>
-                            <Separator />
-                            <div>Apenas para artigos sem Lote</div>
-                            <div className="flex flex-row items-center">
-                              {hasStock &&
-                                quantidadePorLote.data &&
-                                `Quantidade (${quantidadePorLote.data.value[0]?.Quantity}): `}
-                              <Input
-                                className="w-[80px]"
-                                type="number"
-                                onChange={(e) => {
-                                  if (lineNumLoteButton && currentSalesOrder) {
-                                    updateDocumentLineQuantity(
-                                      lineNumLoteButton,
-                                      currentSalesOrder.DocEntry,
-                                      Number(e.target.value)
-                                    );
-                                  }
-                                }}
-                              />
-                            </div>
-                          </>
-                        )}
+                          {/* Show batch managed info */}
+                          <div className="mt-2 text-sm text-gray-600">
+                            {isBatchManaged ? (
+                              <span className="text-blue-600">
+                                ✓ Este item é gerido por lotes
+                              </span>
+                            ) : (
+                              <span className="text-orange-600">
+                                ⚠️ Este item não é gerido por lotes
+                              </span>
+                            )}
+                          </div>
+                        </div>
                       </div>
-                    </AlertDialogDescription>
-                  ) : null}
+                    )}
+
+                    {/* Quantity Input Section (shown for both methods) */}
+                    {loteComputed.showQuantityInput && (
+                      <div className="space-y-3 mt-6">
+                        <div className="flex justify-between items-center">
+                          <h4 className="font-medium text-gray-900">
+                            Lotes Selecionados:
+                          </h4>
+                          <span className="text-sm text-gray-500">
+                            {loteModalState.selection.selectedLotes.length}{" "}
+                            lote(s) selecionado(s)
+                          </span>
+                        </div>
+
+                        <div className="max-h-[300px] overflow-y-scroll border rounded-lg p-4 space-y-3">
+                          {loteModalState.selection.selectedLotes.map(
+                            (loteItem) => (
+                              <div
+                                key={loteItem.batchNumber}
+                                className="flex items-center gap-2 p-3 bg-gray-50 rounded border"
+                              >
+                                {/* Source indicator */}
+                                <span
+                                  className={`text-xs px-2 py-1 rounded font-medium ${
+                                    loteItem.source === "qr"
+                                      ? "bg-blue-100 text-blue-800"
+                                      : "bg-gray-100 text-gray-800"
+                                  }`}
+                                >
+                                  {loteItem.source === "qr" ? "QR" : "Manual"}
+                                </span>
+
+                                {/* Lote info */}
+                                <div className="flex-1">
+                                  <div className="font-medium text-sm">
+                                    {loteItem.batchNumber}
+                                  </div>
+                                  <div className="text-xs text-gray-500">
+                                    {loteItem.itemCode}
+                                  </div>
+                                </div>
+
+                                {/* Quantity input */}
+                                <div className="flex items-center gap-2">
+                                  <Label
+                                    htmlFor={`qty-${loteItem.batchNumber}`}
+                                    className="text-sm font-medium"
+                                  >
+                                    Qtd:
+                                  </Label>
+                                  <Input
+                                    id={`qty-${loteItem.batchNumber}`}
+                                    className="w-[100px]"
+                                    type="number"
+                                    min="0"
+                                    step="1"
+                                    value={loteItem.quantity}
+                                    onChange={(e) =>
+                                      loteActions.updateLoteQuantity(
+                                        loteItem.batchNumber,
+                                        Number(e.target.value)
+                                      )
+                                    }
+                                    placeholder="0"
+                                  />
+                                </div>
+
+                                {/* Remove button */}
+                                <Button
+                                  size="icon"
+                                  variant="ghost"
+                                  onClick={() =>
+                                    loteActions.removeLote(loteItem.batchNumber)
+                                  }
+                                  title="Remover este lote"
+                                  aria-label={`Remover lote ${loteItem.batchNumber}`}
+                                >
+                                  <Trash2 className="h-4 w-4" />
+                                </Button>
+                              </div>
+                            )
+                          )}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Handle loading states */}
+                    {loteComputed.isLoading && (
+                      <div className="text-center p-6">
+                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mx-auto mb-4"></div>
+                        <p className="text-gray-500">
+                          A carregar informações do lote...
+                        </p>
+                      </div>
+                    )}
+
+                    {/* Handle case where no stock/batch managed */}
+                    {!loteComputed.showManualSelection &&
+                      !loteComputed.isLoading && (
+                        <div className="text-center p-6 text-gray-500">
+                          <p>Nenhum lote disponível para este item</p>
+                        </div>
+                      )}
+                  </AlertDialogDescription>
                 </AlertDialogHeader>
 
-                <div className="flex flex-row justify-between">
-                  <Button
-                    disabled={lotes.length === 0 && documentLines.length === 0}
-                    onClick={handleValidateSelection}
-                  >
-                    Validar
-                  </Button>
-                  <AlertDialogFooter>
-                    <AlertDialogCancel onClick={clearLotes}>
+                {/* Enhanced Footer */}
+                <AlertDialogFooter className="flex-col sm:flex-row gap-2">
+                  <div className="flex gap-2">
+                    <AlertDialogCancel
+                      onClick={loteActions.closeModal}
+                      className="flex-1"
+                    >
                       Cancelar
                     </AlertDialogCancel>
+
+                    <Button
+                      disabled={!loteComputed.canValidate}
+                      onClick={handleValidateSelection}
+                      className="min-w-[100px]"
+                    >
+                      {loteModalState.selection.isValidated
+                        ? "Validado ✓"
+                        : "Validar"}
+                    </Button>
+
                     <AlertDialogAction
-                      disabled={!validouSelecaoLote}
-                      onClick={() => {
-                        clearLotes();
-                        setValidouSelecaoLote(false);
-                        setAbrirModalLote(false);
-                      }}
+                      disabled={!loteModalState.selection.isValidated}
+                      onClick={loteActions.closeModal}
                     >
                       Continuar
                     </AlertDialogAction>
-                  </AlertDialogFooter>
-                </div>
+                  </div>
+                </AlertDialogFooter>
               </AlertDialogContent>
             </AlertDialog>
-
+            {/* ADD: Quick Quantity Modal */}
+            <QuickQuantityModal
+              loteModalState={loteModalState}
+              loteActions={loteActions}
+              onConfirm={handleQuickModalConfirm}
+            />
             {/* Pagination */}
             <PaginationControls
               numeroPagina={numeroPagina}

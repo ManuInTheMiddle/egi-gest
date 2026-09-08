@@ -29,38 +29,58 @@ interface ProductTreeLine {
 }
 
 interface ProductTreeStage {
-  Father: string,
-  StageID: number,
-  SequenceNumber: number,
-  StageEntry: number,
-  Name: string,
-  WaitingDays: number
+  Father: string;
+  StageID: number;
+  SequenceNumber: number;
+  StageEntry: number;
+  Name: string;
+  WaitingDays: number;
 }
 interface ApiResponse {
-  "odata.metadata": string,
-  TreeCode: string,
-  TreeType: string,
-  Quantity: number,
-  DistributionRule: null,
-  Project: null,
-  DistributionRule2: null,
-  DistributionRule3: null,
-  DistributionRule4: null,
-  DistributionRule5: null,
-  PriceList: number,
-  Warehouse: string,
-  PlanAvgProdSize: number,
-  HideBOMComponentsInPrintout: string,
-  ProductDescription: string,
-  ProductTreeLines: ProductTreeLine[],
-  ProductTreeStages: ProductTreeStage[]
+  "odata.metadata": string;
+  TreeCode: string;
+  TreeType: string;
+  Quantity: number;
+  DistributionRule: null;
+  Project: null;
+  DistributionRule2: null;
+  DistributionRule3: null;
+  DistributionRule4: null;
+  DistributionRule5: null;
+  PriceList: number;
+  Warehouse: string;
+  PlanAvgProdSize: number;
+  HideBOMComponentsInPrintout: string;
+  ProductDescription: string;
+  ProductTreeLines: ProductTreeLine[];
+  ProductTreeStages: ProductTreeStage[];
 }
 
-const receitaDefault = "214"
-export const useFetchRecipeMateriaPrimaData = (receita: string = receitaDefault
+interface ArtigoItem {
+  "odata.etag": string;
+  ItemCode: string;
+  ItemName: string;
+}
+
+interface ApiResponseArtigos {
+  "odata.metadata": string;
+  value: ArtigoItem[];
+  "odata.nextLink"?: string; // For pagination detection
+}
+
+interface ApiResponseArtigo {
+  "odata.metadata": string;
+  "odata.etag": string;
+  ItemCode: string;
+  ItemName: string;
+}
+
+const receitaDefault = "214";
+export const useFetchRecipeMateriaPrimaData = (
+  receita: string = receitaDefault
 ) => {
   return useQuery({
-    queryKey: ["informacaoMateriasPrimasReceita",receita],
+    queryKey: ["informacaoMateriasPrimasReceita", receita],
     queryFn: async () => {
       const { data } = await axios.get(
         `http://egiquim-sap:50001/b1s/v1/ProductTrees('${receita}')`,
@@ -68,6 +88,48 @@ export const useFetchRecipeMateriaPrimaData = (receita: string = receitaDefault
       );
       return data as ApiResponse;
     },
-    enabled: false
+    enabled: false,
+  });
+};
+
+const itemGroupCodeDefault = 112;
+export const useFetchArtigosProdutoIntermedio = ({
+  skip,
+  itemGroupCode = itemGroupCodeDefault,
+}: {
+  skip: number;
+  itemGroupCode?: number;
+}) => {
+  return useQuery({
+    queryKey: ["artigosProdutoIntermedio", skip, itemGroupCode], // Add itemGroupCode to key
+    queryFn: async () => {
+      const { data } = await axios.get(
+        `http://egiquim-sap:50001/b1s/v1/Items?$filter=ItemsGroupCode eq ${itemGroupCode}&$select=ItemCode,ItemName&$skip=${skip}`,
+        { withCredentials: true }
+      );
+      return data as ApiResponseArtigos;
+    },
+    enabled: true, // Changed from false to true
+    staleTime: 5 * 60 * 1000, // 5 minutes cache
+  });
+};
+
+export const useFetchArtigoProdutoIntermedioUnico = ({
+  itemCode,
+}: {
+  itemCode: string; // Changed from number to string
+}) => {
+  return useQuery({
+    queryKey: ["artigoProdutoIntermedioUnico", itemCode],
+    queryFn: async () => {
+      const { data } = await axios.get(
+        `http://egiquim-sap:50001/b1s/v1/Items('${itemCode}')?$select=ItemCode,ItemName`,
+        { withCredentials: true }
+      );
+      return data as ApiResponseArtigo;
+    },
+    enabled: !!itemCode && itemCode.length > 0,
+    staleTime: 5 * 60 * 1000,
+    retry: 1,
   });
 };

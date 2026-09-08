@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "../globals.css";
-import { Toaster } from "@/components/ui/sonner";
+//import { Toaster } from "@/components/ui/sonner";
 import TanstackProvider from "../../../providers/TanstackProvider";
 const inter = Inter({ subsets: ["latin"] });
 
@@ -21,7 +21,7 @@ export default function RootLayout({
         <TanstackProvider>
           <section>{children}</section>
         </TanstackProvider>
-        <Toaster closeButton />
+        {/*<Toaster closeButton />*/}
       </body>
     </html>
   );

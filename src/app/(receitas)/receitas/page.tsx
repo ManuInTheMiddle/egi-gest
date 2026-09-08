@@ -1,6 +1,9 @@
 "use client";
 import React, { useEffect } from "react";
 import { Rings, Oval } from "react-loader-spinner";
+import { useFetchArtigosProdutoIntermedio } from "@/Services/Receitas/fetchRecipeMateriaPrima";
+import { useFetchArtigoProdutoIntermedioUnico } from "@/Services/Receitas/fetchRecipeMateriaPrima";
+import { RefreshCw } from "lucide-react"; // Add RefreshCw icon
 import {
   Info,
   PlusCircle,
@@ -72,12 +75,23 @@ import { useFetchReceitasSCADA } from "@/Services/ReceitasSCADA/fetchUmaReceitaS
 import { useApagarReceitaSCADA } from "@/Services/ReceitasSCADA/apagarReceitaSCADA";
 import { toast } from "sonner";
 import { format } from "date-fns";
-import { artigosSap as artigos } from "@/lib/artigosSAPreceitas";
+//import { artigosSap as artigos } from "@/lib/artigosSAPreceitas";
 interface materiaPrima {
   artigo: string;
   descricao: string;
 }
 
+interface ArtigoItem {
+  "odata.etag": string;
+  ItemCode: string;
+  ItemName: string;
+}
+
+interface ApiResponseArtigos {
+  "odata.metadata": string;
+  value: ArtigoItem[];
+  "odata.nextLink"?: string;
+}
 interface PassosReceitas {
   NumeroPasso: number;
   Receita: string;
@@ -98,21 +112,30 @@ const Page = () => {
   const [receitaExisteNoSistema, setReceitaExisteNoSistema] = useState(false);
   const [abrirModalCriacaoReceita, setAbrirModalCriacaoReceita] =
     useState(false);
+
+  const [artigosData, setArtigosData] = useState<ArtigoItem[]>([]);
+  const [artigosSkip, setArtigosSkip] = useState(0);
+  const [loadingMoreArtigos, setLoadingMoreArtigos] = useState(false);
+  const [hasMoreArtigos, setHasMoreArtigos] = useState(true);
+  const [searchTerm, setSearchTerm] = useState("");
+  // Add these with your existing state variables
+  const [searchingIndividualItem, setSearchingIndividualItem] = useState(false);
+  const [searchItemCode, setSearchItemCode] = useState("");
+  const [addedCustomItems, setAddedCustomItems] = useState<string[]>([]);
   //variavel do drag and drop
   const [podeEditar, setPodeEditar] = useState(true);
-  //////////////////////////////////////////////////
-  //////////endpoint criar receitas scada///////////
 
   const CriarReceitasScada = useCriarReceitaSCADA();
-  //////////////////////////////////////////////////
-  //////////////////////////////////////////////////
-  //////////endpoint verificar receitas scada///////////
   const ReceitasSCADA = useFetchReceitasSCADA(artigo);
-
-  //////////////////////////////////////////////////
-  //////////////////////////////////////////////////
-  //////////endpoint apagar receitas scada///////////
+  const artigosProdutoIntermedio = useFetchArtigosProdutoIntermedio({
+    skip: artigosSkip,
+    itemGroupCode: 112, // Produtos intermedios
+  });
   const ApagarReceitaScada = useApagarReceitaSCADA();
+  // Add this with your other hooks
+  const artigoProdutoIntermedioUnico = useFetchArtigoProdutoIntermedioUnico({
+    itemCode: searchItemCode,
+  });
 
   //////////////////////////////////////////////////
   //////////Limpar receita aquando a confirmaçao da receita ou criacao///////////
@@ -135,7 +158,78 @@ const Page = () => {
   const handleLimparPassosReceita = () => {
     setPasssosReceita([]);
   };
+  const handleSearchItem = async (itemCode: string) => {
+    if (!itemCode.trim()) return;
+
+    const itemExists = artigosData.find(
+      (item) => item.ItemCode.toLowerCase() === itemCode.toLowerCase()
+    );
+
+    if (itemExists) {
+      toast.info(`Artigo ${itemCode} já está na lista`);
+      return;
+    }
+
+    if (addedCustomItems.includes(itemCode.toLowerCase())) {
+      toast.info(`Artigo ${itemCode} já foi adicionado`);
+      return;
+    }
+
+    try {
+      setSearchingIndividualItem(true);
+      setSearchItemCode(itemCode);
+    } catch (error) {
+      console.error("Error searching for item:", error);
+      toast.error("Erro ao procurar artigo");
+      setSearchingIndividualItem(false);
+    }
+  };
+
+  const isValidItemCode = (code: string) => {
+    return code.length >= 2 && /^[a-zA-Z0-9\/]+$/.test(code);
+  };
+
+  const handleSearchInputChange = (value: string) => {
+    setSearchTerm(value);
+  };
+
+  const handleSearchKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      if (isValidItemCode(searchTerm)) {
+        handleSearchItem(searchTerm);
+      }
+    }
+  };
   //////////////////////////////////////////////////
+  // Function to load initial artigos data
+  const loadArtigosData = async () => {
+    setArtigosSkip(0);
+    setArtigosData([]);
+    await artigosProdutoIntermedio.refetch();
+  };
+
+  // Function to load more artigos (for pagination)
+  const loadMoreArtigos = async () => {
+    if (!loadingMoreArtigos && hasMoreArtigos) {
+      try {
+        setLoadingMoreArtigos(true);
+        setArtigosSkip((prev) => prev + 20);
+        await artigosProdutoIntermedio.refetch();
+      } catch (error) {
+        console.error("Error loading more artigos:", error);
+        toast.error("Erro ao carregar mais artigos");
+        setLoadingMoreArtigos(false); // Reset loading state on error
+      }
+    }
+  };
+
+  // Filter artigos based on search term
+  const filteredArtigos = artigosData.filter(
+    (artigo) =>
+      artigo.ItemCode.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      artigo.ItemName.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   const [parametrosMatriz, setParametrosMatriz] = useState({
     U_Aci: "-",
@@ -175,6 +269,63 @@ const Page = () => {
   const [materiasPrimas, setMateriasPrimas] = useState([] as materiaPrima[]);
   const materiasPrimasReceita = useFetchRecipeMateriaPrimaData(artigo);
   const receita = useFetchRecipeInformationData(artigo);
+
+  useEffect(() => {
+    if (artigoProdutoIntermedioUnico.data && searchingIndividualItem) {
+      const newItem = {
+        "odata.etag": artigoProdutoIntermedioUnico.data["odata.etag"],
+        ItemCode: artigoProdutoIntermedioUnico.data.ItemCode,
+        ItemName: artigoProdutoIntermedioUnico.data.ItemName,
+      };
+
+      setArtigosData((prev) => [newItem, ...prev]);
+      setAddedCustomItems((prev) => [...prev, newItem.ItemCode.toLowerCase()]);
+
+      toast.success(`Artigo ${newItem.ItemCode} adicionado à lista`);
+      setSearchTerm("");
+      setSearchingIndividualItem(false);
+      setSearchItemCode("");
+    }
+
+    if (artigoProdutoIntermedioUnico.isError && searchingIndividualItem) {
+      toast.error(`Artigo "${searchItemCode}" não encontrado`);
+      setSearchingIndividualItem(false);
+      setSearchItemCode("");
+    }
+  }, [
+    artigoProdutoIntermedioUnico.data,
+    artigoProdutoIntermedioUnico.isError,
+    searchingIndividualItem,
+    searchItemCode,
+  ]);
+  // Handle artigos data loading
+  useEffect(() => {
+    if (artigosProdutoIntermedio.data) {
+      const newArtigos = artigosProdutoIntermedio.data.value;
+
+      if (artigosSkip === 0) {
+        setArtigosData(newArtigos);
+      } else {
+        setArtigosData((prev) => [...prev, ...newArtigos]);
+      }
+
+      setHasMoreArtigos(!!artigosProdutoIntermedio.data["odata.nextLink"]);
+    }
+
+    // Always reset loading state when data changes or on error
+    if (artigosProdutoIntermedio.data || artigosProdutoIntermedio.isError) {
+      setLoadingMoreArtigos(false);
+    }
+  }, [
+    artigosProdutoIntermedio.data,
+    artigosProdutoIntermedio.isError,
+    artigosSkip,
+  ]);
+
+  // Load artigos on component mount
+  useEffect(() => {
+    loadArtigosData();
+  }, []);
   useEffect(() => {
     console.log(receita.isFetched);
     console.log("vai comecar a atualizar");
@@ -224,27 +375,26 @@ const Page = () => {
       ? setReceitaExisteNoSistema(true)
       : setReceitaExisteNoSistema(false);
   }, [receita, verificouExistenciaReceita]);
-  
-  useEffect(()=>{
-	  if(CriarReceitasScada.isSuccess){
-		toast.success("Receita criada com sucesso");
-	  }
-	  
-	  if(CriarReceitasScada.isError){
-		toast.error("Erro ao criar receita");
-	  }
-	  
-  },[CriarReceitasScada.isSuccess,CriarReceitasScada.isError])
-  
-  useEffect(()=>{
-	if(ApagarReceitaScada.isSuccess){
-		toast.success("Receita apagada com sucesso")
-	}
 
-	if(ApagarReceitaScada.isError){
-		toast.error("Erro ao apagar receita")
-	}	
-  },[ApagarReceitaScada.isSuccess,ApagarReceitaScada.isError])
+  useEffect(() => {
+    if (CriarReceitasScada.isSuccess) {
+      toast.success("Receita criada com sucesso");
+    }
+
+    if (CriarReceitasScada.isError) {
+      toast.error("Erro ao criar receita");
+    }
+  }, [CriarReceitasScada.isSuccess, CriarReceitasScada.isError]);
+
+  useEffect(() => {
+    if (ApagarReceitaScada.isSuccess) {
+      toast.success("Receita apagada com sucesso");
+    }
+
+    if (ApagarReceitaScada.isError) {
+      toast.error("Erro ao apagar receita");
+    }
+  }, [ApagarReceitaScada.isSuccess, ApagarReceitaScada.isError]);
 
   const [itemsList, setItemsList] = useState([
     {
@@ -257,7 +407,6 @@ const Page = () => {
   ]);
 
   const [passosReceita, setPasssosReceita] = useState([] as PassosReceitas[]);
-
 
   return (
     <div className="flex flex-col">
@@ -283,16 +432,220 @@ const Page = () => {
                   }}
                 >
                   <SelectTrigger className="w-auto">
-                    <SelectValue placeholder="Selecione o  Nº artigo" />
+                    <SelectValue placeholder="Selecione o Nº artigo" />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectGroup>
                       <SelectLabel>Artigos</SelectLabel>
-                      {artigos.map((artigo, index) => (
-                        <SelectItem key={index} value={artigo.Artigo}>
-                          {`(${artigo.Artigo}) ${artigo["Descrição do artigo"]}`}
+                      {/* Loading overlay when fetching more data */}
+                      {(loadingMoreArtigos ||
+                        artigosProdutoIntermedio.isFetching) &&
+                        artigosSkip > 0 && (
+                          <div className="px-2 py-2 bg-gray-50 border-t border-b">
+                            <div className="flex items-center justify-center space-x-2">
+                              <Oval
+                                visible={true}
+                                height="16"
+                                width="16"
+                                color="#84cc27"
+                                ariaLabel="oval-loading"
+                              />
+                              <span className="text-sm text-gray-600">
+                                Carregando novos artigos...
+                              </span>
+                            </div>
+                          </div>
+                        )}
+                      {/* Enhanced search input */}
+                      <div className="px-2 py-1">
+                        <div className="relative">
+                          <Input
+                            placeholder="Procurar artigo... (Enter para adicionar)"
+                            value={searchTerm}
+                            onChange={(e) =>
+                              handleSearchInputChange(e.target.value)
+                            }
+                            onKeyPress={handleSearchKeyPress}
+                            className="h-8 pr-16"
+                            disabled={searchingIndividualItem}
+                          />
+
+                          <div className="absolute right-1 top-1/2 transform -translate-y-1/2 flex gap-1">
+                            {searchingIndividualItem ? (
+                              <Oval
+                                visible={true}
+                                height="16"
+                                width="16"
+                                color="#84cc27"
+                                ariaLabel="searching-loading"
+                              />
+                            ) : (
+                              isValidItemCode(searchTerm) && (
+                                <Button
+                                  size="sm"
+                                  variant="ghost"
+                                  onClick={() => handleSearchItem(searchTerm)}
+                                  className="h-6 w-6 p-0"
+                                  title="Adicionar artigo à lista"
+                                >
+                                  <PlusCircle size={14} />
+                                </Button>
+                              )
+                            )}
+                          </div>
+                        </div>
+
+                        {searchTerm &&
+                          isValidItemCode(searchTerm) &&
+                          !searchingIndividualItem && (
+                            <div className="text-xs text-gray-500 mt-1">
+                              {`Pressione Enter ou clique + para adicionar "
+                              ${searchTerm}" à lista`}
+                            </div>
+                          )}
+                      </div>
+
+                      {/* Loading state */}
+                      {artigosProdutoIntermedio.isLoading &&
+                        artigosSkip === 0 && (
+                          <div className="flex items-center justify-center py-4">
+                            <Oval
+                              visible={true}
+                              height="20"
+                              width="20"
+                              color="#84cc27"
+                              ariaLabel="oval-loading"
+                            />
+                            <span className="ml-2 text-sm">
+                              Carregando artigos...
+                            </span>
+                          </div>
+                        )}
+
+                      {/* Error state */}
+                      {artigosProdutoIntermedio.isError && (
+                        <div className="px-2 py-4 text-center">
+                          <p className="text-red-500 text-sm">
+                            Erro ao carregar artigos
+                          </p>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={loadArtigosData}
+                            className="mt-2"
+                          >
+                            Tentar novamente
+                          </Button>
+                        </div>
+                      )}
+
+                      {/* ✅ FIXED: Using filteredArtigos instead of artigos */}
+                      {filteredArtigos.map((artigo, index) => (
+                        <SelectItem
+                          key={`${artigo.ItemCode}-${index}`}
+                          value={artigo.ItemCode}
+                          className={
+                            addedCustomItems.includes(
+                              artigo.ItemCode.toLowerCase()
+                            )
+                              ? "bg-green-50 border-l-2 border-green-500"
+                              : ""
+                          }
+                        >
+                          <div className="flex items-center justify-between w-full">
+                            <span>{`(${artigo.ItemCode}) ${artigo.ItemName}`}</span>
+                            {addedCustomItems.includes(
+                              artigo.ItemCode.toLowerCase()
+                            ) && (
+                              <span className="text-green-600 text-xs ml-2">
+                                ●
+                              </span>
+                            )}
+                          </div>
                         </SelectItem>
                       ))}
+
+                      {hasMoreArtigos &&
+                        !artigosProdutoIntermedio.isLoading && (
+                          <div className="px-2 py-2">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={loadMoreArtigos}
+                              disabled={
+                                loadingMoreArtigos ||
+                                artigosProdutoIntermedio.isFetching
+                              }
+                              className="w-full"
+                            >
+                              {loadingMoreArtigos ||
+                              artigosProdutoIntermedio.isFetching ? (
+                                <>
+                                  <Oval
+                                    visible={true}
+                                    height="16"
+                                    width="16"
+                                    color="#84cc27"
+                                    ariaLabel="oval-loading"
+                                  />
+                                  <span className="ml-2">Carregando...</span>
+                                </>
+                              ) : (
+                                `Carregar mais artigos ${
+                                  artigosData.length > 0
+                                    ? `(${artigosData.length} carregados)`
+                                    : ""
+                                }`
+                              )}
+                            </Button>
+                            {/* NEW: Additional loading indicator below the button */}
+                            {(loadingMoreArtigos ||
+                              artigosProdutoIntermedio.isFetching) && (
+                              <div className="flex items-center justify-center mt-2">
+                                <div className="flex items-center space-x-2 text-sm text-gray-600">
+                                  <Rings
+                                    visible={true}
+                                    height="20"
+                                    width="20"
+                                    color="#84cc27"
+                                    ariaLabel="rings-loading"
+                                  />
+                                  <span>Buscando mais artigos...</span>
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        )}
+
+                      {/* No results message */}
+                      {filteredArtigos.length === 0 &&
+                        !artigosProdutoIntermedio.isLoading &&
+                        searchTerm && (
+                          <div className="px-2 py-4 text-center">
+                            <p className="text-gray-500 text-sm">
+                              {`Nenhum artigo encontrado para "${searchTerm}"`}
+                            </p>
+                          </div>
+                        )}
+                      {/* Enhanced error state for pagination */}
+                      {artigosProdutoIntermedio.isError && artigosSkip > 0 && (
+                        <div className="px-2 py-4 text-center bg-red-50 border-t">
+                          <p className="text-red-500 text-sm mb-2">
+                            Erro ao carregar mais artigos
+                          </p>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => {
+                              setLoadingMoreArtigos(false);
+                              loadMoreArtigos();
+                            }}
+                            className="text-red-600 border-red-200"
+                          >
+                            Tentar novamente
+                          </Button>
+                        </div>
+                      )}
                     </SelectGroup>
                   </SelectContent>
                 </Select>
@@ -321,6 +674,38 @@ const Page = () => {
                       <Search />
                     )}
                   </Button>
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => {
+                            setArtigosData((prev) =>
+                              prev.filter(
+                                (item) =>
+                                  !addedCustomItems.includes(
+                                    item.ItemCode.toLowerCase()
+                                  )
+                              )
+                            );
+                            setAddedCustomItems([]);
+                            toast.success("Artigos personalizados removidos");
+                          }}
+                          disabled={addedCustomItems.length === 0}
+                          className="h-8"
+                        >
+                          <MinusCircle size={14} />
+                          <span className="ml-1 text-xs">
+                            Limpar adicionados
+                          </span>
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>Remover artigos adicionados manualmente</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
                 </div>
                 <Separator className="my-4" />
                 <div>
@@ -730,7 +1115,7 @@ const Page = () => {
                       key={item.id}
                       value={item}
                       dragListener={podeEditar}
-                      drag={item.fase != ""}
+                      drag={item.fase != "" ? "y" : false}
                     >
                       <div className=" border flex flex-row items-center rounded-sm my-2 px-2 py-4  sm:gap-4 sm:px-0">
                         <div className="ml-3">
@@ -929,7 +1314,12 @@ const Page = () => {
                                 </Select>
                                 <>
                                   <Input
-                                    value={itemsList[item.id].param2}
+                                    value={
+                                      itemsList.find(
+                                        (itemDoFind) =>
+                                          itemDoFind.param1 == item.param1
+                                      )?.param2
+                                    }
                                     onChange={(e) => {
                                       console.log(e.target.value);
                                       if (Number(e.target.value) > 100) {
@@ -1163,42 +1553,143 @@ const Page = () => {
                         <div>Densidade:{parametrosMatriz.U_Den_Max}</div>
                       </div>
                       <AlertDialogDescription>
-                        {itemsList.map((item: any, index) => (
-                          <div key={index} className="flex flex-col">
-                            <div className="flex flex-row gap-2 py-1">
-                              <div className="font-medium">
-                                Etapa {index + 1}:
-                              </div>
-                              <div>
-                                Fase:
-                                {item.fase
-                                  ? fases.filter(
-                                      (fase) => fase.value === item.fase
-                                    )[0].descricao
-                                  : ""}
-                              </div>
-                              {item.param1 != "" ? (
-                                item.fase === "4" ? (
-                                  <div>
-                                    Parametro 1:{" "}
-                                    {
-                                      tipoValidacao.filter(
-                                        (validacao) =>
-                                          validacao.value === item.param1
+                        <div className="max-h-96 overflow-y-auto space-y-2">
+                          {itemsList.map((item: any, index) => (
+                            <div
+                              key={index}
+                              className="border rounded p-3 bg-gray-50"
+                            >
+                              <div className="flex flex-col space-y-2">
+                                <div className="font-medium">
+                                  Etapa {index + 1}:
+                                </div>
+
+                                <div>
+                                  Fase:{" "}
+                                  {item.fase
+                                    ? fases.filter(
+                                        (fase) => fase.value === item.fase
                                       )[0].descricao
-                                    }
+                                    : ""}
+                                </div>
+
+                                {/* Parameter 1 - Material or Operation Parameter */}
+                                {item.param1 !== "" ? (
+                                  <div className="flex items-center gap-2">
+                                    <span>Parametro 1:</span>
+                                    {item.fase === "4" ? (
+                                      // Validation type - keep read-only
+                                      <span className="font-medium">
+                                        {
+                                          tipoValidacao.filter(
+                                            (validacao) =>
+                                              validacao.value === item.param1
+                                          )[0].descricao
+                                        }
+                                      </span>
+                                    ) : item.fase === "2" ? (
+                                      // Agitation percentage - editable
+                                      <div className="flex items-center gap-1">
+                                        <Input
+                                          type="number"
+                                          value={item.param1}
+                                          onChange={(e) => {
+                                            const value = Math.min(
+                                              Math.max(
+                                                parseFloat(e.target.value) ||
+                                                  10,
+                                                10
+                                              ),
+                                              100
+                                            );
+                                            const updatedList = produce(
+                                              itemsList,
+                                              (draft) => {
+                                                draft[index].param1 =
+                                                  value.toString();
+                                              }
+                                            );
+                                            setItemsList(updatedList);
+                                          }}
+                                          className="w-24 h-8 text-base"
+                                          min="10"
+                                          max="100"
+                                        />
+                                        <span>%</span>
+                                      </div>
+                                    ) : item.fase === "5" ? (
+                                      // Wait time - editable
+                                      <div className="flex items-center gap-1">
+                                        <Input
+                                          type="number"
+                                          value={item.param1}
+                                          onChange={(e) => {
+                                            const value = Math.max(
+                                              parseFloat(e.target.value) || 1,
+                                              1
+                                            );
+                                            const updatedList = produce(
+                                              itemsList,
+                                              (draft) => {
+                                                draft[index].param1 =
+                                                  value.toString();
+                                              }
+                                            );
+                                            setItemsList(updatedList);
+                                          }}
+                                          className="w-24 h-8 text-base"
+                                          min="1"
+                                        />
+                                        <span>min.</span>
+                                      </div>
+                                    ) : (
+                                      // Material code - read-only
+                                      <span className="font-medium">
+                                        {item.param1}
+                                      </span>
+                                    )}
                                   </div>
-                                ) : (
-                                  <div>Parametro 1: {item.param1}</div>
-                                )
-                              ) : null}
-                              {item.param2 != "" ? (
-                                <div>Parametro 2: {item.param2} %</div>
-                              ) : null}
+                                ) : null}
+
+                                {/* Parameter 2 - Material Percentage */}
+                                {item.param2 !== "" &&
+                                (item.fase === "1" || item.fase === "3") ? (
+                                  <div className="flex items-center gap-2">
+                                    <span>Parametro 2:</span>
+                                    <div className="flex items-center gap-1">
+                                      <Input
+                                        type="number"
+                                        value={item.param2}
+                                        onChange={(e) => {
+                                          const value = Math.min(
+                                            Math.max(
+                                              parseFloat(e.target.value) || 0,
+                                              0
+                                            ),
+                                            100
+                                          );
+                                          const updatedList = produce(
+                                            itemsList,
+                                            (draft) => {
+                                              draft[index].param2 =
+                                                value.toString();
+                                            }
+                                          );
+                                          setItemsList(updatedList);
+                                        }}
+                                        className="w-24 h-8 text-base"
+                                        min="0"
+                                        max="100"
+                                        step="0.01"
+                                      />
+                                      <span>%</span>
+                                    </div>
+                                  </div>
+                                ) : null}
+                              </div>
                             </div>
-                            <Separator />
-                          </div>
-                        ))}
+                          ))}
+                        </div>
                       </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
@@ -1504,7 +1995,6 @@ const Page = () => {
 };
 
 export default Page;
-
 
 const fases = [
   { value: "1", descricao: "Adição Automática" },

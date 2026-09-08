@@ -7,6 +7,9 @@ const criarConsumoSAP = async (body: any) => {
     body,
     {
       withCredentials: true,
+	  headers: {
+        'Content-Type': 'application/json'
+      }
     }
   );
 };

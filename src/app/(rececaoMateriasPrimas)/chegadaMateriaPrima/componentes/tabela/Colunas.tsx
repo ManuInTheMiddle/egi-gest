@@ -7,25 +7,24 @@ import { Button } from "@/components/ui/button";
 import { QrCode } from "lucide-react";
 import { useRouter } from "next/navigation";
 
+const ActionCell = ({ row }: { row: any }) => {
+  const router = useRouter();
+  const ordemCompraSAP = row.original;
 
-const ActionCell=({row}:{row:any})=>{
-      const router = useRouter();
-      const ordemCompraSAP = row.original;
-
-      return (
-        <Button size={"icon"} variant={"ghost"}>
-          <QrCode
-            onClick={() =>
-              router.push(
-                `/chegadaMateriaPrima/detalhesOrdem/${ordemCompraSAP.DocEntry}`
-              )
-            }
-            className="h-4 w-4"
-          />
-        </Button>
-      );
-}
-
+  return (
+    <Button
+      size={"icon"}
+      variant={"ghost"}
+      onClick={() => {
+        router.push(
+          `/chegadaMateriaPrima/detalhesOrdem/${ordemCompraSAP.DocEntry}`
+        );
+      }}
+    >
+      <QrCode className="h-4 w-4" />
+    </Button>
+  );
+};
 
 export const Colunas: ColumnDef<PurchaseOrder>[] = [
   {
@@ -67,6 +66,6 @@ export const Colunas: ColumnDef<PurchaseOrder>[] = [
   },
   {
     id: "actions",
-    cell: ({ row }) => <ActionCell row={row}/>,
+    cell: ({ row }) => <ActionCell row={row} />,
   },
 ];

@@ -226,7 +226,7 @@ const TableRendering = ({
             />
             <div className="flex flex-col justify-center items-center">
               <p className="font-thin text-6xl text-gray-700 dark:text-gray-400">
-                {completionPercentage.toPrecision(2)}%
+                {completionPercentage.toPrecision(3)}%
               </p>
               <h5 className="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">
                 Ordens Concluidas

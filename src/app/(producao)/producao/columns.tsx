@@ -18,7 +18,7 @@ const ColumnsComponent: ColumnDef<ProductionOrder>[] = [
     cell: ({ row }) => (
       <Checkbox
         checked={row.getIsSelected()}
-        onCheckedChange={(value:any) => row.toggleSelected(!!value)}
+        onCheckedChange={(value: any) => row.toggleSelected(!!value)}
         aria-label="Select row"
       />
     ),
@@ -26,7 +26,7 @@ const ColumnsComponent: ColumnDef<ProductionOrder>[] = [
     enableHiding: false,
   },
   {
-    accessorKey: "AbsoluteEntry",
+    accessorKey: "DocumentNumber",
     header: ({ column }) => {
       return (
         <Button
@@ -92,4 +92,3 @@ const ColumnsComponent: ColumnDef<ProductionOrder>[] = [
 ];
 
 export default ColumnsComponent;
-

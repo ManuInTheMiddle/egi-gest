@@ -4,6 +4,15 @@ import { Suspense } from "react";
 import { getSession, signIn } from "next-auth/react";
 import { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { useLoginSAP } from "@/Services/UserSap/loginSap";
+
+// Mock user para testes offline
+const MOCK_USERS: Record<string, { password: string; role: string }> = {
+  admin: { password: "admin123", role: "admin" },
+  gestor: { password: "gestor123", role: "gestor" },
+  producao: { password: "producao123", role: "producao" },
+  receitas: { password: "receitas123", role: "receitas" },
+};
 
 // Loading component for Suspense fallback
 function LoginLoading() {
@@ -39,8 +48,9 @@ function LoginLoading() {
 
 // Main login form component that uses useSearchParams
 function LoginForm() {
+  const loginUtilizadorSAP = useLoginSAP();
   const router = useRouter();
-  const searchParams = useSearchParams(); // ✅ Now properly wrapped in Suspense
+  const searchParams = useSearchParams();
   const [usernameField, setUsernameField] = useState("");
   const [passwordField, setPasswordField] = useState("");
   const [isEmpty, setIsEmpty] = useState(true);
@@ -57,13 +67,6 @@ function LoginForm() {
 
     return () => clearTimeout(timer);
   }, [usernameField]);
-
-  // Clear error when user starts typing
-  useEffect(() => {
-    if (error && (usernameField || passwordField)) {
-      setError("");
-    }
-  }, [usernameField, passwordField, error]);
 
   const getRoleRedirectUrl = (role: string): string => {
     const roleRoutes: Record<string, string> = {
@@ -94,7 +97,23 @@ function LoginForm() {
       return;
     }
 
+    const mockUser = MOCK_USERS[username.trim().toLowerCase()];
+
+    // DEBUG — apagar depois
+    console.log("username digitado:", username);
+    console.log("username trim+lower:", username.trim().toLowerCase());
+    console.log("mockUser encontrado:", mockUser);
+    console.log("password match:", mockUser?.password === password);
+
+    if (mockUser && mockUser.password === password) {
+      console.log("MOCK LOGIN — utilizador de teste:", username);
+      const redirectUrl = getRoleRedirectUrl(mockUser.role);
+      setIsLoading(false);
+      router.push(redirectUrl);
+      return;
+    }
     try {
+      // First, authenticate with NextAuth
       const result = await signIn("credentials", {
         redirect: false,
         username: username.trim(),
@@ -104,28 +123,50 @@ function LoginForm() {
       if (result?.error) {
         console.error("Login failed:", result.error);
         setError(
-          "Credenciais inválidas. Verifique o utilizador e palavra-passe."
+          "Credenciais inválidas. Verifique o utilizador e palavra-passe.",
         );
-      } else if (result?.ok) {
-        console.log("Login successful!");
+        return;
+      }
 
-        const session = await getSession();
-
-        if (session?.user) {
-          const redirectUrl =
-            callbackUrl !== "/"
-              ? callbackUrl
-              : getRoleRedirectUrl(session.user.role);
-
-          console.log(
-            `Redirecting ${session.user.role} user to: ${redirectUrl}`
-          );
-          router.push(redirectUrl);
-        } else {
-          setError("Erro ao obter informações da sessão");
-        }
-      } else {
+      if (!result?.ok) {
         setError("Erro inesperado durante o login");
+        return;
+      }
+
+      console.log("NextAuth login successful!");
+
+      // Get the session
+      const session = await getSession();
+      if (!session?.user) {
+        setError("Erro ao obter informações da sessão");
+        return;
+      }
+
+      // Determine redirect URL
+      const redirectUrl =
+        callbackUrl !== "/"
+          ? callbackUrl
+          : getRoleRedirectUrl(session.user.role);
+
+      console.log(
+        `User ${session.user.role} authenticated, attempting SAP login...`,
+      );
+
+      try {
+        // Method 1: Using mutateAsync (recommended)
+        await loginUtilizadorSAP.mutateAsync();
+
+        // If we reach here, SAP login was successful
+        console.log("SAP login realizado com sucesso");
+        router.push(redirectUrl);
+      } catch (sapError) {
+        // SAP login failed
+        console.error("SAP login failed:", sapError);
+        setError("Erro ao conectar com o sistema SAP. Tente novamente.");
+
+        // Optionally, you might want to sign out the NextAuth session
+        // since the full login process failed
+        // await signOut({ redirect: false });
       }
     } catch (error) {
       console.error("Login error:", error);
@@ -162,7 +203,7 @@ function LoginForm() {
 
           <div className="mt-10">
             {/* Error Message */}
-            {error && (
+            {error.trim() !== "" && (
               <div className="mb-4 flex items-center gap-2 rounded-md bg-red-50 p-3 text-sm text-red-800 border border-red-200">
                 <span>{error}</span>
               </div>
